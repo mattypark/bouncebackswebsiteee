@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-html {
-  scroll-behavior: smooth;
-}
-
 @theme inline {
   --color-bb-deep: #084734;
   --color-bb-mid: #65BE44;
