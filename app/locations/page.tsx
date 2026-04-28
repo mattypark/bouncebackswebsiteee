@@ -112,6 +112,7 @@ const LOCATION_DATA: StateData[] = [
       { name: "Tri Valley Pickleball Club", city: "Livermore", nonprofit: false, coords: [-121.77, 37.68] },
       { name: "Tri Valley Pickleball Club", city: "San Ramon", nonprofit: false, coords: [-121.98, 37.78] },
       { name: "Tri Valley Pickleball Club", city: "Pleasanton", nonprofit: false, coords: [-121.87, 37.66] },
+      { name: "Blackhawk Country Club", city: "Danville", nonprofit: false, coords: [-121.93, 37.81] },
       { name: "Paseo Club", city: "Valencia", nonprofit: false, coords: [-118.56, 34.41] },
       { name: "The Best Paddle Compound", city: "Los Angeles", nonprofit: false, coords: [-118.35, 34.05] },
     ],
