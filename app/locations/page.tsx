@@ -101,6 +101,7 @@ const LOCATION_DATA: StateData[] = [
       { name: "Tampa Pickleball Crew", city: "Tampa", nonprofit: false, coords: [-82.48, 27.98] },
       { name: "Royal Lakes Country Club", city: "Lakewood Ranch", nonprofit: false, coords: [-82.40, 27.35] },
       { name: "Palm Aire Country Club", city: "Sarasota", nonprofit: false, coords: [-82.46, 27.40] },
+      { name: "Pelican Landing", city: "Bonita Springs", nonprofit: false, coords: [-81.79, 26.38] },
     ],
   },
   {
