@@ -224,6 +224,16 @@ const LOCATION_DATA: StateData[] = [
       { name: "Polk County Pickleball", city: "Des Moines", nonprofit: false, coords: [-93.6, 41.59] },
     ],
   },
+  {
+    fips: "40",
+    abbr: "OK",
+    name: "Oklahoma",
+    coords: [-97.5, 35.5],
+    zoomLevel: 5,
+    locations: [
+      { name: "Premier Pickleball Academy", city: "Oklahoma City", nonprofit: false, coords: [-97.49, 35.41] },
+    ],
+  },
 ];
 
 /* ───────────────────────────────────────────── */
