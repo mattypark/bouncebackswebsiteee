@@ -48,17 +48,17 @@ Message: ${message || "None"}`,
 
 Thank you so much for reaching out and for your interest in bringing BounceBack to your facility.
 
-We're excited to get you involved with our Sustainable Facility Accreditation, and you'll find all program details in the form below:
+We're excited to get you involved with our Sustainable Facility Program, and you'll find all program details in the form below:
 
 http://tinyurl.com/BounceBackRecycle
 
-To begin recycling with BounceBack and join as an accredited facility, simply complete the form, and we will take care of getting your recycling bin shipped, along with everything that comes included in your membership. If you have any questions or want to get in touch, feel free to contact us at recycle@bouncebackpickle.com - we are happy to help.
+To begin recycling with BounceBack and join as an facility partner, simply complete the form, and we will take care of getting your recycling bin shipped, along with everything that comes included in your program. If any questions come up, feel free to reply here - we are happy to help.
 
 We look forward to partnering with you, bringing BounceBack to your location, and empowering your players to help give every cracked ball a second life.
 
 Best,
-Dillon
-Founder, BounceBack Pickle ♻️🚀`,
+Dillon Rosenthal
+Founder, BounceBack Pickle`,
   });
 
   if (confirmError) {
