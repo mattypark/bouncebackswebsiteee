@@ -60,7 +60,7 @@ export default function RecycledRevealSection() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const headlineWords = "We created the First Ever Recycled Pickleball.".split(" ");
+  const headlineWords = "We built pickleball's first closed-loop recycling bin.".split(" ");
 
   return (
     <section
@@ -85,20 +85,82 @@ export default function RecycledRevealSection() {
         </p>
       </div>
 
-      {/* Video */}
-      <div className="relative mx-auto w-[70%] max-w-[500px] md:w-[50%] lg:w-[40%]">
-        <div className="relative overflow-hidden rounded-lg">
-          <video
-            ref={videoRef}
-            src="/recycled-reveal.mp4"
-            muted
-            playsInline
-            loop
-            preload="metadata"
-            className="block w-full"
-          />
+      {/* Video — framed device with color grading */}
+      <div className="relative mx-auto w-[78%] max-w-[440px] md:w-[52%] lg:w-[36%]">
+        {/* Outer accent ring */}
+        <div className="recycled-frame-outer">
+          {/* Black bezel */}
+          <div className="recycled-frame-bezel">
+            <div className="relative overflow-hidden rounded-[26px] bg-black">
+              <video
+                ref={videoRef}
+                src="/recycled-reveal.mp4"
+                muted
+                playsInline
+                loop
+                preload="metadata"
+                className="recycled-video block w-full"
+              />
+              {/* Subtle vignette to cover edge artifacts */}
+              <div className="recycled-vignette pointer-events-none absolute inset-0" />
+            </div>
+          </div>
         </div>
+
+        {/* Caption beneath the frame */}
+        <p className="recycled-caption mt-5 text-center text-xs font-semibold uppercase tracking-[0.22em] text-bb-deep/60 md:text-sm">
+          Drop in. We do the rest.
+        </p>
       </div>
+
+      <style jsx>{`
+        .recycled-frame-outer {
+          padding: 8px;
+          border-radius: 40px;
+          background: linear-gradient(
+            145deg,
+            rgba(8, 71, 52, 0.18),
+            rgba(8, 71, 52, 0)
+          );
+        }
+
+        .recycled-frame-bezel {
+          padding: 10px;
+          border-radius: 32px;
+          background: #0a0a0a;
+          box-shadow:
+            0 50px 100px -40px rgba(8, 71, 52, 0.45),
+            0 20px 40px -20px rgba(10, 10, 10, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .recycled-video {
+          /* Color grade — turns raw phone footage into something curated */
+          filter: contrast(1.08) saturate(1.18) brightness(1.06);
+        }
+
+        .recycled-vignette {
+          background: radial-gradient(
+            ellipse at center,
+            transparent 55%,
+            rgba(0, 0, 0, 0.35) 100%
+          );
+          mix-blend-mode: multiply;
+        }
+
+        .recycled-caption {
+          opacity: 0;
+          transform: translateY(6px);
+          animation: recycled-caption-in 0.7s ease-out 0.4s forwards;
+        }
+
+        @keyframes recycled-caption-in {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </section>
   );
 }

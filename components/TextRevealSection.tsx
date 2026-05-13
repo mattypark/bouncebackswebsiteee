@@ -66,7 +66,12 @@ function TextRevealSection({
     <section
       ref={sectionRef}
       id={id}
-      className={className || "flex w-full items-center justify-center bg-bb-lime py-24 md:py-32"}
+      className={className || "flex w-full items-center justify-center py-24 md:py-32"}
+      style={
+        className
+          ? undefined
+          : { background: "linear-gradient(180deg, #FBFFF1 0%, #CEF17B 55%, #CEF17B 100%)" }
+      }
     >
       <div className="mx-auto max-w-4xl px-8 md:px-14 lg:px-20">
         <p className="text-center text-3xl font-bold leading-snug text-bb-deep md:text-4xl lg:text-5xl">

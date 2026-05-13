@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Pin the workspace root so Turbopack doesn't walk up past Bouncebackwebsite
+  // and try to resolve modules from /Users/matthewpark/Downloads/current-projects.
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   async redirects() {
     return [
       // Old Wix pages → redirect to relevant current pages

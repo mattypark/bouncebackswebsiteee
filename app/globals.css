@@ -129,14 +129,9 @@
 
 .hero-gradient {
   background: linear-gradient(
-    to right,
+    180deg,
     #084734 0%,
-    #1A5C2E 15%,
-    #2B7A28 30%,
-    #4A9E35 50%,
-    #7CC850 65%,
-    #A8DE6A 78%,
-    #CEF17B 88%,
-    #E5FCCD 100%
+    #084734 68%,
+    #FBFFF1 100%
   );
 }

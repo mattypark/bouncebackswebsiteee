@@ -89,49 +89,118 @@ export default function WasteStatSection() {
   const digitCount = parts.filter((p) => p.type === "digit").length;
   let digitIndex = 0;
 
+  // Total odometer roll duration (longest delay + animation length)
+  const ODOMETER_DURATION_MS = 1600 + (digitCount - 1) * 70;
+
   return (
     <section
       ref={sectionRef}
-      className="relative flex w-full items-center bg-bb-lime py-24 md:py-32"
+      className="waste-stat-section relative flex w-full items-center justify-center overflow-hidden py-28 md:py-40"
     >
-      {/* ─── Content ─── */}
-      <div className="w-full flex flex-col items-center px-4">
-        {/* Inner block — sized to the number, label + subtitle aligned to its edges */}
-        <div className="inline-flex flex-col items-stretch">
-          {/* Label — left-aligned to number */}
-          <p className="text-xl font-bold text-bb-deep md:text-2xl lg:text-3xl">
-            Pickleball Creates
-          </p>
+      <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-6 text-center">
+        {/* Eyebrow */}
+        <p
+          className={`waste-stat-eyebrow text-xs font-semibold uppercase tracking-[0.22em] text-bb-deep/80 md:text-sm ${
+            hasStarted ? "is-in" : ""
+          }`}
+        >
+          Pickleball Creates
+        </p>
 
-          {/* Stat Number */}
-          <h2
-            className="font-bold leading-none tracking-tight text-bb-deep whitespace-nowrap"
-            style={{ fontSize: "clamp(2rem, 13.5vw, 22rem)" }}
-            aria-label={TARGET.toLocaleString("en-US")}
-          >
-            {parts.map((part, i) => {
-              if (part.type === "comma") {
-                return <CommaChar key={`c-${i}`} />;
-              }
-              const idx = digitIndex++;
-              const delay = (digitCount - 1 - idx) * 0.07;
-              return (
-                <DigitColumn
-                  key={`d-${i}`}
-                  digit={part.value}
-                  animate={hasStarted}
-                  delay={delay}
-                />
-              );
-            })}
-          </h2>
+        {/* Stat Number */}
+        <h2
+          className={`waste-stat-number font-bold leading-none tracking-tight text-bb-deep whitespace-nowrap ${
+            hasStarted ? "is-in" : ""
+          }`}
+          style={{ fontSize: "clamp(2.5rem, 14vw, 22rem)" }}
+          aria-label={TARGET.toLocaleString("en-US")}
+        >
+          {parts.map((part, i) => {
+            if (part.type === "comma") {
+              return <CommaChar key={`c-${i}`} />;
+            }
+            const idx = digitIndex++;
+            const delay = (digitCount - 1 - idx) * 0.07;
+            return (
+              <DigitColumn
+                key={`d-${i}`}
+                digit={part.value}
+                animate={hasStarted}
+                delay={delay}
+              />
+            );
+          })}
+        </h2>
 
-          {/* Subtitle — right-aligned to number */}
-          <p className="mt-1 text-right text-sm font-normal text-bb-deep md:text-base lg:text-lg">
-            pounds of plastic waste every year.
-          </p>
-        </div>
+        {/* Caption */}
+        <p
+          className={`waste-stat-caption mt-6 text-base font-medium text-bb-deep/85 md:mt-8 md:text-xl ${
+            hasStarted ? "is-in" : ""
+          }`}
+        >
+          pounds of plastic waste, every year.
+        </p>
+
+        {/* Animated divider line */}
+        <div
+          className={`waste-stat-rule mt-10 md:mt-14 ${hasStarted ? "is-in" : ""}`}
+          style={{
+            transitionDelay: `${ODOMETER_DURATION_MS}ms`,
+          }}
+          aria-hidden
+        />
       </div>
+
+      <style jsx>{`
+        .waste-stat-section {
+          background: #CEF17B;
+        }
+
+        .waste-stat-eyebrow,
+        .waste-stat-caption {
+          opacity: 0;
+          transform: translateY(8px);
+          transition:
+            opacity 0.7s ease-out,
+            transform 0.7s ease-out;
+        }
+        .waste-stat-eyebrow.is-in,
+        .waste-stat-caption.is-in {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .waste-stat-caption.is-in {
+          transition-delay: 0.25s;
+        }
+
+        .waste-stat-number {
+          opacity: 0;
+          transform: translateY(12px);
+          transition:
+            opacity 0.7s ease-out 0.1s,
+            transform 0.7s ease-out 0.1s;
+        }
+        .waste-stat-number.is-in {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .waste-stat-rule {
+          width: clamp(80px, 12vw, 160px);
+          height: 2px;
+          background: rgba(8, 71, 52, 0.55);
+          transform-origin: center;
+          transform: scaleX(0);
+          opacity: 0;
+          transition:
+            transform 0.9s cubic-bezier(0.65, 0, 0.2, 1),
+            opacity 0.4s ease-out;
+        }
+        .waste-stat-rule.is-in {
+          transform: scaleX(1);
+          opacity: 1;
+        }
+      `}</style>
     </section>
   );
 }

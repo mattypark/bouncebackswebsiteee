@@ -24,16 +24,31 @@ export default function WhyChooseSection() {
             </p>
           </div>
 
-          {/* Card 2 — 1-1 Same feel */}
+          {/* Card 2 — Zero-effort drop off */}
           <div className="rounded-xl border-2 border-bb-lime bg-white p-8">
             <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-bb-mint">
-              <span className="text-2xl font-bold text-black">=</span>
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-black"
+              >
+                <path d="M3 7h18l-2 12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L3 7z" />
+                <path d="M8 7V5a4 4 0 0 1 8 0v2" />
+                <path d="M12 11v6" />
+                <path d="m9 14 3 3 3-3" />
+              </svg>
             </div>
             <p className="mb-2 text-base font-bold text-black md:text-lg">
-              1-1 Same feel with Pro Pickleballs.
+              Zero effort. Free pickup.
             </p>
             <p className="text-sm leading-relaxed text-black/60 md:text-base">
-              Our recycling and remanufacturing process is designed to replicate the same experience as a professional pickleball.
+              Drop your cracked balls into the bin and forget about it. We handle collection, transport, and remolding — no extra work for your club.
             </p>
           </div>
 
