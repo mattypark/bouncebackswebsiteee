@@ -456,20 +456,50 @@ export default function TheProcessSection() {
           }
           .process-grid {
             grid-template-columns: 1fr;
-            gap: 2.5rem;
+            gap: 2.25rem;
             opacity: 1 !important;
           }
-          .process-numerals {
-            padding-right: 80px;
+
+          /* Numerals on the left, copy on the right — same row */
+          .process-right {
+            flex-direction: row;
             align-items: center;
+            gap: 1.25rem;
+          }
+          .process-numerals {
+            padding-right: 0;
+            flex-shrink: 0;
+            gap: 0.25rem;
+            align-items: flex-start;
           }
           .process-numeral {
-            text-align: center;
+            font-size: 72px;
+            line-height: 0.95;
+            text-align: left;
           }
+
+          /* No scroll-driven arrow on mobile — color contrast indicates active */
+          .process-arrow {
+            display: none;
+          }
+
+          /* Copy flows naturally beside numerals (no absolute stacking) */
           .process-copy {
-            margin: 0 auto;
-            text-align: center;
-            min-height: 140px;
+            flex: 1;
+            margin: 0;
+            text-align: left;
+            min-height: 0;
+            max-width: 100%;
+            align-self: center;
+          }
+          .process-copy-slide {
+            position: relative;
+            inset: auto;
+            display: none;
+            transform: none;
+          }
+          .process-copy-slide.is-active {
+            display: block;
           }
         }
       `}</style>
