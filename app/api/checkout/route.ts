@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://bouncebackpickle.com";
 
-  const lineItems: import("stripe").Stripe.Checkout.SessionCreateParams.LineItem[] = [
+  const lineItems = [
     {
       price_data: {
         currency: "usd",
