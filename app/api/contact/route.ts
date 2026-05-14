@@ -2,36 +2,96 @@ import { Resend } from "resend";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+const GOOGLE_SHEETS_WEBHOOK_URL =
+  process.env.GOOGLE_SHEETS_WEBHOOK_URL ||
+  "https://script.google.com/macros/s/AKfycby8jNGuoNbpRmhSQe7b6Z7isyTSFMF5593zP65L9j2xQlVMge0PUt64WWHFVZNcFU2D/exec";
+
 export async function POST(req: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-  const { name, email, phone, organization, relationship, message } = await req.json();
 
-  // Store bin request in Supabase
-  const { error: dbError } = await supabase
-    .from("bin_requests")
-    .insert({ name, email, phone: phone || null, organization: organization || null, relationship: relationship || null, message: message || null });
+  const body = await req.json();
+  const {
+    firstName = "",
+    lastName = "",
+    phone = "",
+    email = "",
+    facilityName = "",
+    streetAddress = "",
+    city = "",
+    state = "",
+    zipCode = "",
+    additionalBins = "",
+    agreedTerms = false,
+    agreedUpdates = false,
+  } = body;
+
+  // Fire-and-forget: append a row to the Google Sheet via Apps Script webhook.
+  // Don't block the response or fail the request if this errors.
+  fetch(GOOGLE_SHEETS_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch((err) => {
+    console.error("Google Sheets webhook error:", err);
+  });
+
+  const fullName = `${firstName} ${lastName}`.trim();
+  const fullAddress = [streetAddress, city, state, zipCode]
+    .filter(Boolean)
+    .join(", ");
+
+  // Compose a structured summary that fits the existing `message` column
+  const messageSummary = [
+    `Facility: ${facilityName}`,
+    `Address: ${fullAddress}`,
+    `Membership: Sustainable Facility Accreditation Membership - $150/year`,
+    `Additional Bins: ${additionalBins}`,
+    `Agreed to Terms: ${agreedTerms ? "Yes" : "No"}`,
+    `Wants Updates: ${agreedUpdates ? "Yes" : "No"}`,
+  ].join("\n");
+
+  // Store bin request in Supabase (existing schema)
+  const { error: dbError } = await supabase.from("bin_requests").insert({
+    name: fullName,
+    email,
+    phone: phone || null,
+    organization: facilityName || null,
+    relationship: null,
+    message: messageSummary,
+  });
 
   if (dbError) {
     console.error("Supabase insert error:", dbError);
   }
 
-  // 1. Notify Dillon with the submission details
+  // 1. Notify Dillon with the full submission
   const { error: notifyError } = await resend.emails.send({
     from: "BounceBack Form <recycle@bouncebackpickle.com>",
     to: "Bouncebackpickle@gmail.com",
-    subject: `New Bin Request from ${name}`,
-    text: `New bin request submitted:
+    subject: `New Bin Request from ${fullName || email}`,
+    text: `New facility sign-up:
 
-Name: ${name}
+— Contact —
+Name: ${fullName}
 Email: ${email}
 Phone: ${phone || "Not provided"}
-Organization: ${organization || "Not provided"}
-Relationship to Facility: ${relationship || "Not provided"}
-Message: ${message || "None"}`,
+
+— Facility —
+Name: ${facilityName}
+Street: ${streetAddress}
+City: ${city}
+State: ${state}
+Zip: ${zipCode}
+
+— Program —
+Membership: Sustainable Facility Accreditation Membership - $150/year
+Additional Bins: ${additionalBins}
+Agreed to Terms & Conditions: ${agreedTerms ? "Yes" : "No"}
+Wants Program Updates: ${agreedUpdates ? "Yes" : "No"}`,
   });
 
   if (notifyError) {
@@ -39,20 +99,18 @@ Message: ${message || "None"}`,
     return NextResponse.json({ error: "Failed to send submission." }, { status: 500 });
   }
 
-  // 2. Send confirmation email to the person who submitted
+  // 2. Send confirmation email to the submitter
   const { error: confirmError } = await resend.emails.send({
     from: "Dillon @ BounceBack <recycle@bouncebackpickle.com>",
     to: email,
     subject: "Welcome to BounceBack ♻️",
-    text: `Hi ${name}!
+    text: `Hi ${firstName || "there"}!
 
-Thank you so much for reaching out and for your interest in bringing BounceBack to your facility.
+Thank you so much for signing up ${facilityName ? `${facilityName} ` : ""}for the BounceBack Pickle Recycling Program.
 
-We're excited to get you involved with our Sustainable Facility Program, and you'll find all program details in the form below:
+We've received your submission and will be in touch shortly with next steps — including how to finalize your Sustainable Facility Accreditation Membership and schedule the shipment of your branded recycling receptacle${additionalBins && !additionalBins.toLowerCase().startsWith("no") ? ` (plus your ${additionalBins.toLowerCase()})` : ""}.
 
-http://tinyurl.com/BounceBackRecycle
-
-To begin recycling with BounceBack and join as an facility partner, simply complete the form, and we will take care of getting your recycling bin shipped, along with everything that comes included in your program. If any questions come up, feel free to reply here - we are happy to help.
+If any questions come up in the meantime, feel free to reply directly to this email — we're happy to help.
 
 We look forward to partnering with you, bringing BounceBack to your location, and empowering your players to help give every cracked ball a second life.
 
