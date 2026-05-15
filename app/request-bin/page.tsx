@@ -328,7 +328,12 @@ export default function RequestBinPage() {
 
   const addons =
     ADDITIONAL_BIN_OPTIONS.find((o) => o.label === formData.additionalBins)?.addons ?? 0;
-  const total = BASE_MEMBERSHIP_PRICE + addons;
+  // Membership renews yearly; bins are one-time.
+  const membershipFee = Math.round(BASE_MEMBERSHIP_PRICE * 0.033 * 100) / 100;
+  const binsFee = Math.round(addons * 0.033 * 100) / 100;
+  const recurringYearly =
+    Math.round((BASE_MEMBERSHIP_PRICE + membershipFee) * 100) / 100;
+  const total = Math.round((recurringYearly + addons + binsFee) * 100) / 100;
 
   const inputClass =
     "w-full rounded-xl bg-bb-deep px-6 py-4 text-sm text-white outline-none placeholder:text-white/30 md:py-5 md:text-base";
@@ -829,23 +834,60 @@ export default function RequestBinPage() {
                         Order summary
                       </p>
                       <div className="space-y-2.5 text-sm text-black/70 md:text-base">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-black/40">
+                          Annual membership
+                        </p>
                         <div className="flex items-baseline justify-between">
                           <span>Sustainable Facility Accreditation Membership</span>
                           <span className="font-semibold text-bb-deep">
                             ${BASE_MEMBERSHIP_PRICE}/yr
                           </span>
                         </div>
+                        <div className="flex items-baseline justify-between">
+                          <span>Convenience fee (3.3%)</span>
+                          <span className="font-semibold text-bb-deep">
+                            +${membershipFee.toFixed(2)}/yr
+                          </span>
+                        </div>
+
                         {addons > 0 && (
-                          <div className="flex items-baseline justify-between">
-                            <span>{formData.additionalBins}</span>
-                            <span className="font-semibold text-bb-deep">+${addons}</span>
-                          </div>
+                          <>
+                            <div className="mt-3 border-t border-bb-deep/10 pt-3" />
+                            <p className="text-xs font-semibold uppercase tracking-wide text-black/40">
+                              One-time
+                            </p>
+                            <div className="flex items-baseline justify-between">
+                              <span>{formData.additionalBins}</span>
+                              <span className="font-semibold text-bb-deep">
+                                +${addons.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex items-baseline justify-between">
+                              <span>Convenience fee (3.3%)</span>
+                              <span className="font-semibold text-bb-deep">
+                                +${binsFee.toFixed(2)}
+                              </span>
+                            </div>
+                          </>
                         )}
+
                         <div className="mt-3 border-t border-bb-deep/10 pt-3" />
                         <div className="flex items-baseline justify-between text-base md:text-lg">
                           <span className="font-bold text-bb-deep">Total today</span>
-                          <span className="font-bold text-bb-deep">${total}</span>
+                          <span className="font-bold text-bb-deep">
+                            ${total.toFixed(2)}
+                          </span>
                         </div>
+                        <div className="flex items-baseline justify-between text-sm text-black/55">
+                          <span>Renews each year</span>
+                          <span className="font-semibold">
+                            ${recurringYearly.toFixed(2)}/yr
+                          </span>
+                        </div>
+                        <p className="pt-1 text-xs leading-relaxed text-black/50">
+                          Membership renews automatically each year — cancel anytime. Bins
+                          are a one-time charge.
+                        </p>
                       </div>
                     </div>
 
@@ -929,7 +971,7 @@ export default function RequestBinPage() {
                     >
                       {paymentStatus === "redirecting"
                         ? "Redirecting..."
-                        : `Pay $${total}`}
+                        : `Pay $${total.toFixed(2)}`}
                     </button>
                   )}
 
