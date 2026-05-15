@@ -330,10 +330,9 @@ export default function RequestBinPage() {
     ADDITIONAL_BIN_OPTIONS.find((o) => o.label === formData.additionalBins)?.addons ?? 0;
   // Membership renews yearly; bins are one-time.
   const membershipFee = Math.round(BASE_MEMBERSHIP_PRICE * 0.033 * 100) / 100;
-  const binsFee = Math.round(addons * 0.033 * 100) / 100;
   const recurringYearly =
     Math.round((BASE_MEMBERSHIP_PRICE + membershipFee) * 100) / 100;
-  const total = Math.round((recurringYearly + addons + binsFee) * 100) / 100;
+  const total = Math.round((recurringYearly + addons) * 100) / 100;
 
   const inputClass =
     "w-full rounded-xl bg-bb-deep px-6 py-4 text-sm text-white outline-none placeholder:text-white/30 md:py-5 md:text-base";
@@ -843,9 +842,9 @@ export default function RequestBinPage() {
                             ${BASE_MEMBERSHIP_PRICE}/yr
                           </span>
                         </div>
-                        <div className="flex items-baseline justify-between">
+                        <div className="flex items-baseline justify-between text-xs text-black/50">
                           <span>Convenience fee (3.3%)</span>
-                          <span className="font-semibold text-bb-deep">
+                          <span>
                             +${membershipFee.toFixed(2)}/yr
                           </span>
                         </div>
@@ -860,12 +859,6 @@ export default function RequestBinPage() {
                               <span>{formData.additionalBins}</span>
                               <span className="font-semibold text-bb-deep">
                                 +${addons.toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="flex items-baseline justify-between">
-                              <span>Convenience fee (3.3%)</span>
-                              <span className="font-semibold text-bb-deep">
-                                +${binsFee.toFixed(2)}
                               </span>
                             </div>
                           </>
