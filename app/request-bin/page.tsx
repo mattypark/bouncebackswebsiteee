@@ -82,6 +82,7 @@ const TOTAL_STEPS = 5; // 0=welcome, 1=contact, 2=facility, 3=program, 4=payment
 const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ZIP_RX = /^\d{5}(-\d{4})?$/;
 
+
 export default function RequestBinPage() {
   const styleRef = useRef<HTMLStyleElement | null>(null);
   const [step, setStep] = useState(0);
@@ -100,6 +101,7 @@ export default function RequestBinPage() {
     agreedUpdates: false,
   });
   const [savedToBackend, setSavedToBackend] = useState(false);
+  const [savedRowNumber, setSavedRowNumber] = useState<number | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "redirecting" | "unavailable">("idle");
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -115,6 +117,32 @@ export default function RequestBinPage() {
       style.remove();
       styleRef.current = null;
     };
+  }, []);
+
+  // When Stripe redirects back with ?paid=1&session_id=cs_xxx, verify the
+  // session server-side and flip the sheet row to "subscribed". This is the
+  // fallback for not having a Stripe webhook configured yet — once the
+  // webhook is set up, this becomes redundant but harmless (idempotent).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("paid") !== "1") return;
+    const sessionId = params.get("session_id");
+    if (!sessionId) {
+      setCompleted(true);
+      return;
+    }
+    fetch("/api/stripe-verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }),
+    })
+      .catch(() => {})
+      .finally(() => {
+        setCompleted(true);
+        // Strip the query string so a refresh doesn't re-verify.
+        window.history.replaceState({}, "", "/request-bin");
+      });
   }, []);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
@@ -168,8 +196,9 @@ export default function RequestBinPage() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  // Save current info to backend, then advance one step
-  async function saveAndContinue() {
+  // Step 2 → append a new row to the Google Sheet (cols A,B,C,D,F,G,H,I,J,N).
+  // Returns the rowNumber so step 3 can update K,L,M on the same row.
+  async function saveFacility() {
     const msg = validateStep(step);
     if (msg) {
       setError(msg);
@@ -178,14 +207,27 @@ export default function RequestBinPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("/api/sheet-webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          action: "facility",
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email,
+          facilityName: formData.facilityName,
+          streetAddress: formData.streetAddress,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+        }),
       });
-      if (!res.ok) throw new Error("Save failed.");
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+      setSavedRowNumber(data.rowNumber);
       setSavedToBackend(true);
-      setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
+      setStep(3);
     } catch {
       setError("Something went wrong saving your info. Please try again.");
     } finally {
@@ -193,12 +235,71 @@ export default function RequestBinPage() {
     }
   }
 
-  // Step 4 → create Stripe Checkout session (or fall back gracefully)
+  // Step 3 → update K,L,M (additional bins, agreed terms, wants updates) on the
+  // row created in step 2, then fire the Resend email + Supabase insert.
+  async function saveProgram() {
+    const msg = validateStep(step);
+    if (msg) {
+      setError(msg);
+      return;
+    }
+    if (!savedRowNumber) {
+      setError("Missing row reference. Please go back to Facility Information and resave.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/sheet-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "program",
+          rowNumber: savedRowNumber,
+          additionalBins: formData.additionalBins,
+          agreedTerms: formData.agreedTerms,
+          agreedUpdates: formData.agreedUpdates,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+
+      // Notify Dillon + send confirmation email + insert into Supabase.
+      // Fire-and-forget so a slow Resend response doesn't block the UI.
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      }).catch(() => {});
+
+      setStep(4);
+    } catch {
+      setError("Something went wrong saving your selections. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Step 4 → mark sheet "checkout-started" on the saved row, then create a
+  // Stripe Checkout Session and redirect. Stripe's webhook will later flip
+  // the row to "subscribed", which triggers the checkForNewSubscribers
+  // email pipeline.
   async function startPayment() {
     setPaymentStatus("redirecting");
     setError("");
     try {
-      const res = await fetch("/api/checkout", {
+      if (savedRowNumber) {
+        await fetch("/api/sheet-webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "checkout-started",
+            rowNumber: savedRowNumber,
+          }),
+        }).catch(() => {});
+      }
+
+      const res = await fetch("/api/stripe-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,16 +308,15 @@ export default function RequestBinPage() {
           lastName: formData.lastName,
           facilityName: formData.facilityName,
           additionalBins: formData.additionalBins,
+          rowNumber: savedRowNumber,
         }),
       });
       const data = await res.json();
-      if (res.ok && data.url) {
-        window.location.href = data.url;
-      } else if (res.status === 503) {
+      if (!res.ok || !data.url) {
         setPaymentStatus("unavailable");
-      } else {
-        throw new Error(data.error || "Checkout failed.");
+        return;
       }
+      window.location.href = data.url;
     } catch {
       setPaymentStatus("unavailable");
     }
@@ -299,47 +399,130 @@ export default function RequestBinPage() {
               >
                 {/* ─── Step 0: Welcome ─── */}
                 {step === 0 && (
-                  <div className="space-y-5 text-center">
-                    <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-5xl">
-                      Welcome!
-                    </h1>
-                    <div className="space-y-4 text-left text-sm leading-relaxed text-black/70 md:text-base">
-                      <p>
-                        We&apos;re excited to invite your facility to become a member of the{" "}
-                        <span className="font-semibold text-bb-deep">
-                          BounceBack Pickle Recycling Program
-                        </span>
-                        , a simple, impactful way to reduce waste, support sustainability,
-                        and show your pickleball community that you care.
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-bb-mid">
+                        Step 1 of 5 — Welcome
                       </p>
-                      <p>
-                        As a member, you will receive an exclusive branded{" "}
-                        <span className="font-semibold">Recycling Receptacle</span> for your
-                        facility, along with BounceBack&apos;s{" "}
-                        <span className="font-semibold">
-                          Sustainable Facility Accreditation Certificate
-                        </span>
-                        , and will join an elite group in helping transform worn-out
-                        pickleballs into new ones. Your participation will assist in
-                        preventing hundreds of thousands of pounds of plastic reaching
-                        landfill sites and closing the recycling loop by giving pickleballs
-                        a second life.
-                      </p>
-                      <p>
-                        Additionally, your facility will be included in BounceBack&apos;s
-                        marketing platforms across our social media channels with a large
-                        and ever-growing audience of pickleball enthusiasts. To-date a
-                        number of videos have gone viral with millions of views.
-                      </p>
-                      <p>
-                        Finally, as we progress BounceBack&apos;s manufacturing business,
-                        members will be entitled to promotional pricing on the world&apos;s
-                        first 100% recycled pickleballs.
-                      </p>
-                      <p className="text-bb-deep">
-                        This form takes just a few minutes to complete.
+                      <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-[44px] lg:leading-[1.1]">
+                        Let&apos;s get your facility set up.
+                      </h1>
+                      <p className="text-sm leading-relaxed text-black/55 md:text-base">
+                        Fill this out and we&apos;ll take care of the rest — bin shipped,
+                        certificate sent, and your facility listed in the BounceBack network.
                       </p>
                     </div>
+
+                    <div className="space-y-3">
+                      {[
+                        {
+                          title: "Branded recycling receptacle",
+                          body: "Ships directly to your facility — included in year one.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                              <line x1="12" y1="22.08" x2="12" y2="12" />
+                            </svg>
+                          ),
+                        },
+                        {
+                          title: "Sustainable Facility Accreditation Certificate",
+                          body: "Official certification showing your community you care.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <rect x="3" y="4" width="18" height="13" rx="2" />
+                              <path d="M8 21l4-3 4 3" />
+                              <circle cx="12" cy="10" r="2.5" />
+                            </svg>
+                          ),
+                        },
+                        {
+                          title: "Market your facility as certified sustainable",
+                          body: "Show players your facility is leading the way.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 9-9 4 0 7 3 7 7a7 7 0 0 1-7 7" />
+                              <path d="M11 20c0-3 2-7 9-7" />
+                            </svg>
+                          ),
+                        },
+                        {
+                          title: "Listed on the BounceBack partner directory",
+                          body: "Your facility featured on our website for all to find.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                          ),
+                        },
+                        {
+                          title: "First access to recycled pickleballs at launch",
+                          body: "Members get priority when our balls drop.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                              <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                              <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+                              <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+                            </svg>
+                          ),
+                        },
+                        {
+                          title: "Exclusive pricing on recycled pickleballs",
+                          body: "Member discount on the world's first 100% recycled pickleballs.",
+                          icon: (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                              <line x1="7" y1="7" x2="7.01" y2="7" />
+                            </svg>
+                          ),
+                        },
+                      ].map((b) => (
+                        <div
+                          key={b.title}
+                          className="flex items-start gap-4 rounded-xl border border-black/5 bg-white px-4 py-3.5 md:px-5 md:py-4"
+                        >
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bb-deep/5 text-bb-deep">
+                            {b.icon}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-black md:text-[15px]">
+                              {b.title}
+                            </p>
+                            <p className="mt-0.5 text-xs leading-relaxed text-black/50 md:text-sm">
+                              {b.body}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-xl bg-bb-lime/15 px-4 py-3.5 text-sm text-bb-deep md:px-5">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="mt-0.5 h-5 w-5 shrink-0"
+                      >
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                      <span>
+                        Join a growing network of facilities making America&apos;s
+                        fastest-growing sport sustainable.
+                      </span>
+                    </div>
+
+                    <p className="text-center text-xs text-black/40 md:text-sm">
+                      Takes just a few minutes to complete.
+                    </p>
                   </div>
                 )}
 
@@ -507,15 +690,42 @@ export default function RequestBinPage() {
 
                     <div className="rounded-2xl border-2 border-bb-deep/10 bg-white p-5 text-sm leading-relaxed text-black/70 md:p-6">
                       <p className="mb-3 text-base font-bold text-bb-deep">
-                        Sustainable Facility Accreditation Membership — $150/year
+                        The Sustainable Facility Accreditation Membership Includes:
                       </p>
-                      <p>Your membership includes:</p>
-                      <ul className="mt-2 space-y-1.5 pl-5 [list-style:disc] marker:text-bb-mid">
-                        <li>One branded BounceBack Recycling Receptacle</li>
-                        <li>Sustainable Facility Accreditation Certificate</li>
-                        <li>Inclusion in BounceBack&apos;s marketing & social channels</li>
-                        <li>Promotional pricing on future recycled pickleballs</li>
+                      <ul className="mt-2 space-y-2">
+                        {[
+                          "One BounceBack Pickle recycling bin (shipped to your facility)",
+                          "Branding materials and clear instructions for setup + ball collection",
+                          "Stamped Sustainable Facility Accreditation Certificate for on-site display",
+                          "Promotional email template for your facilities members/players",
+                          "Listing and promotion on BounceBack Pickle's website & social channels",
+                          "Access to purchase 100% recycled pickleballs at a discounted rate for resale or facility use",
+                        ].map((item) => (
+                          <li key={item} className="flex items-start gap-2.5">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="#65BE44"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="mt-0.5 h-4 w-4 shrink-0"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span>{item}</span>
+                          </li>
+                        ))}
                       </ul>
+                      <p className="mt-4 font-semibold text-bb-deep">
+                        Price: $150/year per facility
+                      </p>
+                      <p className="mt-3 text-xs leading-relaxed text-black/55 md:text-sm">
+                        <span className="font-semibold text-bb-deep">Note:</span> Members
+                        are responsible for shipping of collected balls (you will receive
+                        a personalized BounceBack Shipping Portal for the most affordable
+                        and convenient shipping rates).
+                      </p>
                     </div>
 
                     <div className="relative">
@@ -544,7 +754,16 @@ export default function RequestBinPage() {
                       />
                       <div>
                         <p className="text-sm font-semibold text-bb-deep">
-                          I agree to the Membership Terms &amp; Conditions{" "}
+                          I agree to the{" "}
+                          <a
+                            href="https://docs.google.com/document/d/1apV07AJb46iM0duGfUGw4-U-iMSSfUMg/edit"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-bb-mid underline underline-offset-2 hover:text-bb-deep"
+                          >
+                            Membership Terms &amp; Conditions
+                          </a>{" "}
                           <span className="text-red-500" aria-label="required">
                             *
                           </span>
@@ -682,7 +901,7 @@ export default function RequestBinPage() {
                   {step === 2 && (
                     <button
                       type="button"
-                      onClick={saveAndContinue}
+                      onClick={saveFacility}
                       disabled={loading}
                       className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 disabled:cursor-not-allowed disabled:opacity-50 md:py-5 md:text-base"
                     >
@@ -693,10 +912,11 @@ export default function RequestBinPage() {
                   {step === 3 && (
                     <button
                       type="button"
-                      onClick={goNext}
-                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 md:py-5 md:text-base"
+                      onClick={saveProgram}
+                      disabled={loading}
+                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 disabled:cursor-not-allowed disabled:opacity-50 md:py-5 md:text-base"
                     >
-                      Next →
+                      {loading ? "Saving..." : "Save & Next →"}
                     </button>
                   )}
 
