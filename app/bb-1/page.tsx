@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
+import { VIDEOS } from "@/lib/video-urls";
 
 
 const videos = [
-  "/videos/bb1-clip-2.mp4",
-  "/videos/bb1-clip-3.mp4",
-  "/videos/bb1-clip-4.mp4",
+  VIDEOS.bb1Clip2,
+  VIDEOS.bb1Clip3,
+  VIDEOS.bb1Clip4,
 ];
 
 export default function BB1ProductPage() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { VIDEOS } from "@/lib/video-urls";
 
 export default function RecycledRevealSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -94,7 +95,7 @@ export default function RecycledRevealSection() {
             <div className="relative overflow-hidden rounded-[26px] bg-black">
               <video
                 ref={videoRef}
-                src="/recycled-reveal.mp4"
+                src={VIDEOS.recycledReveal}
                 muted
                 playsInline
                 loop

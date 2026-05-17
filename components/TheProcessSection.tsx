@@ -1,25 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { VIDEOS } from "@/lib/video-urls";
 
 const STEPS = [
   {
     number: "1",
     title: "Collect",
     body: "Cracked pickleballs are collected in BounceBack bins and shipped out for reprocessing before they ever reach a landfill.",
-    video: "/process1.mp4",
+    video: VIDEOS.process1,
   },
   {
     number: "2",
     title: "Grind",
     body: "Collected balls are broken down into raw material.",
-    video: "/process2.mp4",
+    video: VIDEOS.process2,
   },
   {
     number: "3",
     title: "Remold",
     body: "That material is remolded into new pickleballs, retaining the same feel & same bounce.",
-    video: "/process3.mp4",
+    video: VIDEOS.process3,
   },
 ];
 
