@@ -106,8 +106,17 @@ export default function RequestBinPage() {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Visible "Saving… → Saved ✓" indicator so users know background save status.
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const facilitySavePromise = useRef<Promise<number> | null>(null);
   const restoredRef = useRef(false);
+  const savedToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function flashSaved() {
+    setSaveStatus("saved");
+    if (savedToastTimerRef.current) clearTimeout(savedToastTimerRef.current);
+    savedToastTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2200);
+  }
 
   // Restore form state from localStorage on mount (one-time).
   useEffect(() => {
@@ -262,6 +271,13 @@ export default function RequestBinPage() {
     // Optimistically advance — no spinner, no wait.
     setStep(3);
 
+    // If they already have a row, don't append a duplicate. Just advance.
+    if (savedRowNumber) {
+      flashSaved();
+      return;
+    }
+
+    setSaveStatus("saving");
     const saveTask = (async () => {
       const res = await fetch("/api/sheet-webhook", {
         method: "POST",
@@ -286,8 +302,8 @@ export default function RequestBinPage() {
       return data.rowNumber as number;
     })();
 
-    saveTask.catch(() => {
-      // Surface a non-blocking notice if the background save failed.
+    saveTask.then(() => flashSaved()).catch(() => {
+      setSaveStatus("error");
       setError("Your info didn't save. Go back and try again.");
     });
 
@@ -306,12 +322,14 @@ export default function RequestBinPage() {
     setError("");
     // Optimistic advance.
     setStep(4);
+    setSaveStatus("saving");
 
     (async () => {
       try {
         const rowNumber =
           savedRowNumber ?? (await facilitySavePromise.current);
         if (!rowNumber) {
+          setSaveStatus("error");
           setError(
             "Missing row reference. Please go back to Facility Information and resave."
           );
@@ -330,6 +348,7 @@ export default function RequestBinPage() {
         });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+        flashSaved();
 
         // Notify Dillon + send confirmation email + insert into Supabase.
         // Fire-and-forget so a slow Resend response doesn't block anything.
@@ -356,7 +375,7 @@ export default function RequestBinPage() {
           }),
         }).catch(() => {});
       } catch {
-        setError("Something went wrong saving your selections.");
+        setSaveStatus("error"); setError("Something went wrong saving your selections.");
       }
     })();
   }
@@ -482,6 +501,33 @@ export default function RequestBinPage() {
                     style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
                   />
                 </div>
+                {saveStatus !== "idle" && (
+                  <div
+                    className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
+                      saveStatus === "saving"
+                        ? "bg-bb-deep/5 text-bb-deep/70"
+                        : saveStatus === "saved"
+                        ? "bg-bb-mid/10 text-bb-mid"
+                        : "bg-red-50 text-red-600"
+                    }`}
+                  >
+                    {saveStatus === "saving" && (
+                      <>
+                        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-bb-deep/30 border-t-bb-deep" />
+                        <span>Saving your information…</span>
+                      </>
+                    )}
+                    {saveStatus === "saved" && (
+                      <>
+                        <span aria-hidden>✓</span>
+                        <span>Saved — your information is safe.</span>
+                      </>
+                    )}
+                    {saveStatus === "error" && (
+                      <span>Couldn&apos;t save. Please try again.</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <form
