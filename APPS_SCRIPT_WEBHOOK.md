@@ -15,6 +15,8 @@ at three points in the form flow:
 | `action: "program"` (after Step 3) | Updates cols K, L, M on the row returned above (additional bins / agreed terms / wants updates). Fixes the bug where those fields weren't being captured. |
 | `action: "checkout-started"` (when they click Pay) | Sets col R = `"checkout-started"` and col U = now. |
 | `action: "subscribed"` (Stripe webhook on `checkout.session.completed`) | Sets col R = `"subscribed"`, col P = Stripe session ID, col Q = total cents, col U = now. The existing `checkForNewSubscribers` timer picks this up and fires the email pipeline. |
+| `action: "save-payment-link"` (Stripe checkout backend, after session created) | Writes the Stripe Checkout URL to col O (`To join — click below`) so Dillon can copy/send it manually to facilities that didn't finish paying. |
+| `action: "checkout-canceled"` (frontend, after Stripe cancel redirect) | Clears col R back to empty so a canceled checkout doesn't look like a started payment. |
 
 Website rows always start at row 15 to keep them visually separate from
 Google Form responses (which fill rows 2–14).
@@ -104,6 +106,34 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
 
+
+    if (action === 'save-payment-link') {
+      const rowNumber = parseInt(data.rowNumber, 10);
+      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      sheet.getRange(rowNumber, 15).setValue(data.paymentUrl || '');               // O  To join — click below
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (action === 'checkout-canceled') {
+      const rowNumber = parseInt(data.rowNumber, 10);
+      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+      // Clear "checkout-started" so the row doesn't look like they paid.
+      sheet.getRange(rowNumber, 18).setValue('');                                  // R  Payable Status
+      sheet.getRange(rowNumber, 21).setValue(new Date());                          // U  Payable Last Update
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: true }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
     return ContentService
       .createTextOutput(JSON.stringify({ ok: false, error: 'unknown action: ' + action }))
       .setMimeType(ContentService.MimeType.JSON);

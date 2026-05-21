@@ -106,6 +106,33 @@ export default function RequestBinPage() {
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const facilitySavePromise = useRef<Promise<number> | null>(null);
+  const restoredRef = useRef(false);
+
+  // Restore form state from localStorage on mount (one-time).
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    try {
+      const raw = localStorage.getItem("bb-request-bin-state");
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved.formData) setFormData((prev) => ({ ...prev, ...saved.formData }));
+      if (typeof saved.savedRowNumber === "number") setSavedRowNumber(saved.savedRowNumber);
+      if (typeof saved.step === "number") setStep(saved.step);
+    } catch {}
+  }, []);
+
+  // Persist on every change so info survives a Stripe cancel / accidental reload.
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "bb-request-bin-state",
+        JSON.stringify({ formData, savedRowNumber, step })
+      );
+    } catch {}
+  }, [formData, savedRowNumber, step]);
+
 
   useEffect(() => {
     if (styleRef.current) return;
@@ -143,6 +170,32 @@ export default function RequestBinPage() {
         // Strip the query string so a refresh doesn't re-verify.
         window.history.replaceState({}, "", "/request-bin");
       });
+  }, []);
+  // Stripe canceled → bounce back to step 4 (payment) with their form intact
+  // and revert the sheet row from "checkout-started" so it doesn't look
+  // like they actually started paying.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("canceled") !== "1") return;
+    // Restore step 4 immediately so they see the payment screen.
+    setStep(4);
+    setPaymentStatus("idle");
+    // Strip the query string so a refresh doesn't keep firing this.
+    window.history.replaceState({}, "", "/request-bin");
+    // Read the row number out of state-restore (localStorage already ran above).
+    try {
+      const raw = localStorage.getItem("bb-request-bin-state");
+      const saved = raw ? JSON.parse(raw) : null;
+      const rowNumber = saved?.savedRowNumber;
+      if (rowNumber) {
+        fetch("/api/sheet-webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "checkout-canceled", rowNumber }),
+        }).catch(() => {});
+      }
+    } catch {}
   }, []);
 
   function update<K extends keyof FormData>(key: K, value: FormData[K]) {
@@ -196,17 +249,20 @@ export default function RequestBinPage() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  // Step 2 → append a new row to the Google Sheet (cols A,B,C,D,F,G,H,I,J,N).
-  // Returns the rowNumber so step 3 can update K,L,M on the same row.
+  // Step 2 → kick off the Apps Script append in the background and advance the
+  // UI immediately so it feels instant. Step 3 awaits this promise before its
+  // own save (so the row number is guaranteed by then).
   async function saveFacility() {
     const msg = validateStep(step);
     if (msg) {
       setError(msg);
       return;
     }
-    setLoading(true);
     setError("");
-    try {
+    // Optimistically advance — no spinner, no wait.
+    setStep(3);
+
+    const saveTask = (async () => {
       const res = await fetch("/api/sheet-webhook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,77 +283,95 @@ export default function RequestBinPage() {
       if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
       setSavedRowNumber(data.rowNumber);
       setSavedToBackend(true);
-      setStep(3);
-    } catch {
-      setError("Something went wrong saving your info. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+      return data.rowNumber as number;
+    })();
+
+    saveTask.catch(() => {
+      // Surface a non-blocking notice if the background save failed.
+      setError("Your info didn't save. Go back and try again.");
+    });
+
+    facilitySavePromise.current = saveTask;
   }
 
-  // Step 3 → update K,L,M (additional bins, agreed terms, wants updates) on the
-  // row created in step 2, then fire the Resend email + Supabase insert.
+  // Step 3 → update K,L,M on the row from step 2, then fire Resend + Supabase.
+  // Optimistic: advance immediately and run network work in background. We
+  // await the in-flight facility save first to be sure we have a row number.
   async function saveProgram() {
     const msg = validateStep(step);
     if (msg) {
       setError(msg);
       return;
     }
-    if (!savedRowNumber) {
-      setError("Missing row reference. Please go back to Facility Information and resave.");
-      return;
-    }
-    setLoading(true);
     setError("");
-    try {
-      const res = await fetch("/api/sheet-webhook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "program",
-          rowNumber: savedRowNumber,
-          additionalBins: formData.additionalBins,
-          agreedTerms: formData.agreedTerms,
-          agreedUpdates: formData.agreedUpdates,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
+    // Optimistic advance.
+    setStep(4);
 
-      // Notify Dillon + send confirmation email + insert into Supabase.
-      // Fire-and-forget so a slow Resend response doesn't block the UI.
-      fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      }).catch(() => {});
+    (async () => {
+      try {
+        const rowNumber =
+          savedRowNumber ?? (await facilitySavePromise.current);
+        if (!rowNumber) {
+          setError(
+            "Missing row reference. Please go back to Facility Information and resave."
+          );
+          return;
+        }
+        const res = await fetch("/api/sheet-webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "program",
+            rowNumber,
+            additionalBins: formData.additionalBins,
+            agreedTerms: formData.agreedTerms,
+            agreedUpdates: formData.agreedUpdates,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
 
-      setStep(4);
-    } catch {
-      setError("Something went wrong saving your selections. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+        // Notify Dillon + send confirmation email + insert into Supabase.
+        // Fire-and-forget so a slow Resend response doesn't block anything.
+        fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }).catch(() => {});
+
+        // Pre-generate a Stripe Checkout Session so the link lands in the
+        // sheet (col O) even for facilities that drop off before clicking
+        // Pay. The backend writes session.url to col O before responding.
+        // Fire-and-forget — we don't redirect from here.
+        fetch("/api/stripe-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            facilityName: formData.facilityName,
+            additionalBins: formData.additionalBins,
+            rowNumber,
+          }),
+        }).catch(() => {});
+      } catch {
+        setError("Something went wrong saving your selections.");
+      }
+    })();
   }
 
-  // Step 4 → mark sheet "checkout-started" on the saved row, then create a
-  // Stripe Checkout Session and redirect. Stripe's webhook will later flip
-  // the row to "subscribed", which triggers the checkForNewSubscribers
-  // email pipeline.
+  // Step 4 → create the Stripe Checkout Session FIRST. Only after we have a
+  // valid Stripe URL do we mark the sheet row "checkout-started" — that way a
+  // failed Stripe call doesn't leave the row stuck looking like the customer
+  // started paying when they never could.
   async function startPayment() {
     setPaymentStatus("redirecting");
     setError("");
     try {
-      if (savedRowNumber) {
-        await fetch("/api/sheet-webhook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "checkout-started",
-            rowNumber: savedRowNumber,
-          }),
-        }).catch(() => {});
-      }
+      // Make sure step 2 finished saving before we try to pay.
+      const rowNumber =
+        savedRowNumber ?? (await facilitySavePromise.current) ?? null;
 
       const res = await fetch("/api/stripe-checkout", {
         method: "POST",
@@ -308,7 +382,7 @@ export default function RequestBinPage() {
           lastName: formData.lastName,
           facilityName: formData.facilityName,
           additionalBins: formData.additionalBins,
-          rowNumber: savedRowNumber,
+          rowNumber,
         }),
       });
       const data = await res.json();
@@ -316,12 +390,25 @@ export default function RequestBinPage() {
         setPaymentStatus("unavailable");
         return;
       }
+
+      // Only now mark checkout-started (fire-and-forget — Stripe redirect
+      // shouldn't wait on a sheet write).
+      if (rowNumber) {
+        fetch("/api/sheet-webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "checkout-started",
+            rowNumber,
+          }),
+        }).catch(() => {});
+      }
+
       window.location.href = data.url;
     } catch {
       setPaymentStatus("unavailable");
     }
   }
-
   function finishWithoutPayment() {
     setCompleted(true);
   }
