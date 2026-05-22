@@ -115,7 +115,13 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
       }
-      sheet.getRange(rowNumber, 15).setValue(data.paymentUrl || '');               // O  To join — click below
+      const url = (data.paymentUrl || '').toString().replace(/"/g, '');
+      const label = (data.paymentLabel || 'Pay link').toString().replace(/"/g, '');
+      if (url) {
+        sheet.getRange(rowNumber, 15).setFormula('=HYPERLINK("' + url + '","' + label + '")'); // O  To join — click below
+      } else {
+        sheet.getRange(rowNumber, 15).setValue('');
+      }
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
         .setMimeType(ContentService.MimeType.JSON);
