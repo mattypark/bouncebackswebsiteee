@@ -11,15 +11,15 @@ at three points in the form flow:
 
 | Action sent from website | Sheet effect |
 |---|---|
-| `action: "facility"` (after Step 2) | Appends a new row at row 15+, fills cols A, B, C, D, F, G, H, I, J, N. Returns `{rowNumber}` so we can update that exact row later. |
+| `action: "facility"` (after Step 2) | Appends a new row right after the last existing row, fills cols A, B, C, D, F, G, H, I, J, N. Returns `{rowNumber}` so we can update that exact row later. |
 | `action: "program"` (after Step 3) | Updates cols K, L, M on the row returned above (additional bins / agreed terms / wants updates). Fixes the bug where those fields weren't being captured. |
 | `action: "checkout-started"` (when they click Pay) | Sets col R = `"checkout-started"` and col U = now. |
 | `action: "subscribed"` (Stripe webhook on `checkout.session.completed`) | Sets col R = `"subscribed"`, col P = Stripe session ID, col Q = total cents, col U = now. The existing `checkForNewSubscribers` timer picks this up and fires the email pipeline. |
 | `action: "save-payment-link"` (Stripe checkout backend, after session created) | Writes the Stripe Checkout URL to col O (`To join — click below`) so Dillon can copy/send it manually to facilities that didn't finish paying. |
 | `action: "checkout-canceled"` (frontend, after Stripe cancel redirect) | Clears col R back to empty so a canceled checkout doesn't look like a started payment. |
 
-Website rows always start at row 15 to keep them visually separate from
-Google Form responses (which fill rows 2–14).
+Website rows append directly after the last filled row (no gap), so the
+spreadsheet stays continuous.
 
 ## The code
 
@@ -29,9 +29,10 @@ Google Form responses (which fill rows 2–14).
  * Two actions:
  *   action: "facility"  → append a new row, fill cols A,B,C,D,F,G,H,I,J,N. Returns { rowNumber }.
  *   action: "program"   → update cols K,L,M on the row returned above.
- * Website rows start at row 15 so they don't collide with Google Form responses (rows 2–14).
+ * Website rows append at lastRow+1 (right after Google Form responses).
  */
-const WEBSITE_START_ROW = 15;
+// Website rows append directly after the last form row (no gap).
+const WEBSITE_MIN_ROW = 2;
 
 function doPost(e) {
   try {
@@ -41,7 +42,7 @@ function doPost(e) {
 
     if (action === 'facility') {
       const lastRow = sheet.getLastRow();
-      const targetRow = Math.max(lastRow + 1, WEBSITE_START_ROW);
+      const targetRow = Math.max(lastRow + 1, WEBSITE_MIN_ROW);
 
       sheet.getRange(targetRow, 1 ).setValue(new Date());                  // A  Timestamp
       sheet.getRange(targetRow, 2 ).setValue(data.firstName     || '');    // B  First Name
@@ -61,7 +62,7 @@ function doPost(e) {
 
     if (action === 'program') {
       const rowNumber = parseInt(data.rowNumber, 10);
-      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+      if (!rowNumber || rowNumber < 2) {
         return ContentService
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
@@ -76,7 +77,7 @@ function doPost(e) {
 
     if (action === 'checkout-started') {
       const rowNumber = parseInt(data.rowNumber, 10);
-      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+      if (!rowNumber || rowNumber < 2) {
         return ContentService
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
@@ -90,7 +91,7 @@ function doPost(e) {
 
     if (action === 'subscribed') {
       const rowNumber = parseInt(data.rowNumber, 10);
-      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+      if (!rowNumber || rowNumber < 2) {
         return ContentService
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
@@ -109,7 +110,7 @@ function doPost(e) {
 
     if (action === 'save-payment-link') {
       const rowNumber = parseInt(data.rowNumber, 10);
-      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+      if (!rowNumber || rowNumber < 2) {
         return ContentService
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
@@ -122,7 +123,7 @@ function doPost(e) {
 
     if (action === 'checkout-canceled') {
       const rowNumber = parseInt(data.rowNumber, 10);
-      if (!rowNumber || rowNumber < WEBSITE_START_ROW) {
+      if (!rowNumber || rowNumber < 2) {
         return ContentService
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
