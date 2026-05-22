@@ -118,12 +118,12 @@ export default function RequestBinPage() {
     savedToastTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2200);
   }
 
-  // Restore form state from localStorage on mount (one-time).
+  // Restore form state from sessionStorage on mount (one-time).
   useEffect(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
     try {
-      const raw = localStorage.getItem("bb-request-bin-state");
+      const raw = sessionStorage.getItem("bb-request-bin-state");
       if (!raw) return;
       const saved = JSON.parse(raw);
       if (saved.formData) setFormData((prev) => ({ ...prev, ...saved.formData }));
@@ -135,7 +135,7 @@ export default function RequestBinPage() {
   // Persist on every change so info survives a Stripe cancel / accidental reload.
   useEffect(() => {
     try {
-      localStorage.setItem(
+      sessionStorage.setItem(
         "bb-request-bin-state",
         JSON.stringify({ formData, savedRowNumber, step })
       );
@@ -192,9 +192,9 @@ export default function RequestBinPage() {
     setPaymentStatus("idle");
     // Strip the query string so a refresh doesn't keep firing this.
     window.history.replaceState({}, "", "/request-bin");
-    // Read the row number out of state-restore (localStorage already ran above).
+    // Read the row number out of state-restore (sessionStorage already ran above).
     try {
-      const raw = localStorage.getItem("bb-request-bin-state");
+      const raw = sessionStorage.getItem("bb-request-bin-state");
       const saved = raw ? JSON.parse(raw) : null;
       const rowNumber = saved?.savedRowNumber;
       if (rowNumber) {
@@ -1034,7 +1034,7 @@ export default function RequestBinPage() {
 
                 {/* ─── Navigation ─── */}
                 <div className="flex items-center justify-between gap-3 pt-2">
-                  {step > 0 && step < 4 ? (
+                  {step > 0 ? (
                     <button
                       type="button"
                       onClick={goBack}
