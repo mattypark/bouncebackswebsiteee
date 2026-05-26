@@ -142,6 +142,65 @@ export default function RequestBinPage() {
     } catch {}
   }, [formData, savedRowNumber, step]);
 
+  // Auto-save program fields (K, L, M) the moment they're touched.
+  // Prevents data loss if user fills step 3 but abandons before clicking
+  // "Save & Next". Debounced 800ms so we don't spam the sheet on every keystroke.
+  useEffect(() => {
+    if (!savedRowNumber) return;
+    const handle = setTimeout(() => {
+      fetch("/api/sheet-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "program",
+          rowNumber: savedRowNumber,
+          additionalBins: formData.additionalBins,
+          agreedTerms: formData.agreedTerms,
+          agreedUpdates: formData.agreedUpdates,
+        }),
+      }).catch(() => {});
+    }, 800);
+    return () => clearTimeout(handle);
+  }, [
+    savedRowNumber,
+    formData.additionalBins,
+    formData.agreedTerms,
+    formData.agreedUpdates,
+  ]);
+
+  // Auto-generate the Stripe Checkout link as soon as the user agrees to terms.
+  // This writes the payment URL into sheet col O via stripe-checkout's
+  // fire-and-forget save-payment-link call, so Dillon can manually send it
+  // to facilities that didn't finish paying. Debounced 1000ms so toggling
+  // additionalBins doesn't spawn a session per change.
+  useEffect(() => {
+    if (!savedRowNumber) return;
+    if (!formData.agreedTerms) return;
+    const handle = setTimeout(() => {
+      fetch("/api/stripe-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          facilityName: formData.facilityName,
+          additionalBins: formData.additionalBins,
+          rowNumber: savedRowNumber,
+        }),
+      }).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(handle);
+  }, [
+    savedRowNumber,
+    formData.agreedTerms,
+    formData.additionalBins,
+    formData.email,
+    formData.firstName,
+    formData.lastName,
+    formData.facilityName,
+  ]);
+
 
   useEffect(() => {
     if (styleRef.current) return;
