@@ -22,18 +22,27 @@ const WEBHOOK_URL = 'https://bounceback-shipping-production.up.railway.app/admin
 const API_KEY = 'xyz';
 
 const COL = {
-  firstName:      2,
-  lastName:       3,
-  phone:          4,
-  email:          14,
-  facilityName:   6,
-  streetAddress:  7,
-  city:           8,
-  state:          9,
-  zip:            10,
-  payableStatus:  18,
-  email1Sent:     22,
+  timestamp:            1,
+  firstName:            2,
+  lastName:             3,
+  phone:                4,
+  email:                14,
+  facilityName:         6,
+  streetAddress:        7,
+  city:                 8,
+  state:                9,
+  zip:                  10,
+  paymentLink:          15,  // O — HYPERLINK to Stripe Checkout
+  payableStatus:        18,
+  email1Sent:           22,
+  paymentReminderSent:  27,  // AA — set when reminder email goes out
 };
+
+// Time window for the payment reminder.
+// Don't email before 5 minutes (they may still be on Stripe) or after
+// 24 hours (avoid spamming people who decided not to join days later).
+const REMINDER_MIN_MS = 5  * 60 * 1000;
+const REMINDER_MAX_MS = 24 * 60 * 60 * 1000;
 
 function checkForNewSubscribers() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -85,6 +94,73 @@ function checkForNewSubscribers() {
       }
     } catch (err) {
       console.error('[BounceBack] Request error row', i + 1, ':', err.message);
+    }
+  }
+}
+
+/**
+ * Sends a follow-up email with the Stripe payment link to anyone who got
+ * a link generated (col O) but hasn't paid yet (col R != "subscribed").
+ * Only fires 5 min – 24 hr after they signed up. Marks col AA so they
+ * only get one reminder.
+ *
+ * Set up a time-driven trigger to run this every 5 minutes:
+ *   Apps Script editor → Triggers (clock icon) → Add Trigger →
+ *   Function: sendPaymentReminders → Event: Time-driven →
+ *   Type: Minutes timer → Every 5 minutes → Save.
+ */
+function sendPaymentReminders() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data  = sheet.getDataRange().getValues();
+  const now   = Date.now();
+
+  for (let i = 1; i < data.length; i++) {
+    const row             = data[i];
+    const email           = (row[COL.email - 1] || '').toString().trim();
+    const status          = (row[COL.payableStatus - 1] || '').toString().trim().toLowerCase();
+    const paymentLinkCell = row[COL.paymentLink - 1];
+    const timestamp       = row[COL.timestamp - 1];
+    const reminderSent    = row[COL.paymentReminderSent - 1];
+    const firstName       = (row[COL.firstName - 1] || '').toString().trim();
+    const facilityName    = (row[COL.facilityName - 1] || '').toString().trim();
+
+    if (!email) continue;
+    if (status === 'subscribed') continue;
+    if (!paymentLinkCell) continue;
+    if (reminderSent) continue;
+    if (!(timestamp instanceof Date)) continue;
+
+    const elapsed = now - timestamp.getTime();
+    if (elapsed < REMINDER_MIN_MS) continue;
+    if (elapsed > REMINDER_MAX_MS) continue;
+
+    // Pull the real URL out of the HYPERLINK formula in col O.
+    const formula = sheet.getRange(i + 1, COL.paymentLink).getFormula();
+    let url = '';
+    if (formula) {
+      const match = formula.match(/HYPERLINK\(\s*"([^"]+)"/);
+      if (match) url = match[1];
+    } else {
+      url = paymentLinkCell.toString();
+    }
+    if (!url) continue;
+
+    const subject = 'Finish your BounceBack Pickle membership';
+    const body =
+      'Hi ' + (firstName || 'there') + ',\n\n' +
+      'Thanks for starting your Sustainable Facility Accreditation Membership' +
+      (facilityName ? ' for ' + facilityName : '') + '. ' +
+      'It looks like checkout didn\'t finish on your end.\n\n' +
+      'Pick up where you left off here:\n' + url + '\n\n' +
+      'Reply to this email if you have any questions or hit a snag.\n\n' +
+      'The BounceBack Pickle Team';
+
+    try {
+      MailApp.sendEmail({ to: email, subject: subject, body: body });
+      sheet.getRange(i + 1, COL.paymentReminderSent).setValue(new Date());
+      console.log('[BounceBack] Reminder sent to', email, 'row', i + 1);
+    } catch (err) {
+      console.error('[BounceBack] Reminder failed row', i + 1, ':', err.message);
     }
   }
 }
@@ -246,3 +322,4 @@ function doGet() {
 | X | 24 | 3rd email sent |
 | Y | 25 | Envelope |
 | Z | 26 | Bins |
+| AA | 27 | Payment reminder sent |
