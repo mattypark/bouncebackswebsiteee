@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useCart } from "./CartContext";
+import { SHOP_DOMAIN } from "@/lib/shopify-products";
 
 export default function CartDrawer() {
   const {
@@ -17,6 +18,33 @@ export default function CartDrawer() {
   } = useCart();
 
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [redirecting, setRedirecting] = useState(false);
+
+  function handleCheckout() {
+    if (items.length === 0) return;
+    // Shopify multi-variant cart permalink:
+    //   https://{shop}/cart/{variantId}:{qty},{variantId}:{qty}
+    // For recurring lines we need ?selling_plan={id}. The single query param
+    // applies the same plan to every line in the cart, so we only attach it
+    // when every line is a subscription AND they all share the same plan.
+    // Mixed carts (one-time + subscription) fall back to plain permalink and
+    // the subscription line will be charged once instead of recurring — a
+    // limitation we accept since most customers buy a single pack.
+    const parts = items.map((i) => `${i.id}:${i.quantity}`).join(",");
+    const planIds = Array.from(
+      new Set(items.map((i) => i.sellingPlanId).filter(Boolean)),
+    );
+    const allSubsSamePlan =
+      items.length > 0 &&
+      items.every((i) => i.sellingPlanId) &&
+      planIds.length === 1;
+    let url = `https://${SHOP_DOMAIN}/cart/${parts}`;
+    if (allSubsSamePlan) {
+      url += `?selling_plan=${planIds[0]}`;
+    }
+    setRedirecting(true);
+    window.location.href = url;
+  }
 
   // Lock body scroll when open
   useEffect(() => {
@@ -213,9 +241,17 @@ export default function CartDrawer() {
                     $ {subtotal.toLocaleString()}
                   </span>
                 </div>
-                <button className="w-full bg-bb-deep py-4 text-sm font-semibold tracking-[0.1em] text-white transition-colors hover:bg-bb-deep/90">
-                  Continue
+                <button
+                  type="button"
+                  onClick={handleCheckout}
+                  disabled={redirecting}
+                  className="w-full bg-bb-deep py-4 text-sm font-semibold tracking-[0.1em] text-white transition-colors hover:bg-bb-deep/90 disabled:opacity-60"
+                >
+                  {redirecting ? "REDIRECTING…" : "CHECKOUT"}
                 </button>
+                <p className="mt-3 text-center text-[11px] text-black/40">
+                  Secure checkout via Shopify
+                </p>
               </div>
             )}
           </motion.div>

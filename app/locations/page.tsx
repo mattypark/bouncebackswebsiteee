@@ -102,6 +102,17 @@ const LOCATION_DATA: StateData[] = [
       { name: "Royal Lakes Country Club", city: "Lakewood Ranch", nonprofit: false, coords: [-82.40, 27.35] },
       { name: "Palm Aire Country Club", city: "Sarasota", nonprofit: false, coords: [-82.46, 27.40] },
       { name: "Pelican Landing", city: "Bonita Springs", nonprofit: false, coords: [-81.79, 26.38] },
+      { name: "Spanish Wells Golf & Country Club", city: "Bonita Springs", nonprofit: false, coords: [-81.78, 26.34] },
+    ],
+  },
+  {
+    fips: "08",
+    abbr: "CO",
+    name: "Colorado",
+    coords: [-105.5, 39.0],
+    zoomLevel: 4.5,
+    locations: [
+      { name: "Club Volo - South Broadway", city: "Denver", nonprofit: false, coords: [-104.99, 39.69] },
     ],
   },
   {

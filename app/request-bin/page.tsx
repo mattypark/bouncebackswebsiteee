@@ -325,6 +325,25 @@ export default function RequestBinPage() {
       if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
       setSavedRowNumber(data.rowNumber);
       setSavedToBackend(true);
+
+      // Pre-generate the $150 membership Stripe link as soon as facility
+      // info is saved — so every saved row gets a payment link in col O,
+      // even if they drop off before step 3. If they add bins in step 3,
+      // that pre-gen overwrites col O with the bin-inclusive link.
+      // Fire-and-forget — never block advancing the form.
+      fetch("/api/stripe-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          facilityName: formData.facilityName,
+          additionalBins: formData.additionalBins,
+          rowNumber: data.rowNumber,
+        }),
+      }).catch(() => {});
+
       return data.rowNumber as number;
     })();
 

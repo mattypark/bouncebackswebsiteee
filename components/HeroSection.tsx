@@ -255,17 +255,17 @@ export default function HeroSection() {
             >
               ORDER A RECYCLING BIN
             </a>
-            <div
+            <a
+              href="/bb-1"
               className="relative inline-block select-none"
-              aria-disabled="true"
             >
-              <span className="inline-block border-2 border-white/30 px-5 py-2.5 text-[10px] font-semibold tracking-[0.15em] text-white/40 line-through">
-                BUY BB-1
+              <span className="inline-block border-2 border-white px-5 py-2.5 text-[10px] font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep">
+                PREORDER BB-1
               </span>
               <span className="absolute -top-2 -right-2 rotate-[8deg] rounded-sm bg-bb-lime px-1.5 py-0.5 text-[8px] font-bold tracking-[0.15em] text-bb-deep shadow">
-                COMING SOON
+                NEW
               </span>
-            </div>
+            </a>
           </div>
           <a
             href="#waitlist"
@@ -302,7 +302,7 @@ export default function HeroSection() {
         <p className="animate-fade-in-up-delayed-2 mt-6 max-w-[420px] text-sm leading-relaxed text-white/90 lg:text-base">
           Pickleball&apos;s first closed-loop recycling bin.
           <br />
-          Were turning the fastest sport into the first sustainable sport
+          We&apos;re turning the fastest growing sport into the first sustainable sport.
         </p>
 
         {/* CTA Buttons */}
@@ -314,17 +314,17 @@ export default function HeroSection() {
             >
               ORDER A RECYCLING BIN
             </a>
-            <div
+            <a
+              href="/bb-1"
               className="relative inline-block select-none"
-              aria-disabled="true"
             >
-              <span className="inline-block border-2 border-white/30 px-8 py-3.5 text-xs font-semibold tracking-[0.15em] text-white/40 line-through">
-                BUY BB-1
+              <span className="inline-block border-2 border-white px-8 py-3.5 text-xs font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep">
+                PREORDER BB-1
               </span>
               <span className="absolute -top-2.5 -right-2.5 rotate-[8deg] rounded-sm bg-bb-lime px-2 py-0.5 text-[9px] font-bold tracking-[0.15em] text-bb-deep shadow">
-                COMING SOON
+                NEW
               </span>
-            </div>
+            </a>
           </div>
           <a
             href="#waitlist"

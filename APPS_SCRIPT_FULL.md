@@ -8,8 +8,12 @@ This file is the **single source of truth** for the entire Apps Script. It
 includes:
 
 - `WEBHOOK_URL`, `API_KEY`, `COL` constants
+- `withRetry` helper that retries Google Sheets calls on transient INTERNAL
+  errors (the "We're sorry, a server error occurred while reading from storage"
+  bug that occasionally hits both timers and `doPost`)
 - `checkForNewSubscribers` (existing timer-driven function that forwards
   `subscribed` rows to the shipping backend)
+- `sendPaymentReminders` (timer-driven Gmail follow-up)
 - `WEBSITE_MIN_ROW` constant for website-driven rows
 - `doPost` handling all 6 actions from the website + Stripe pipeline
 - `doGet` health check
@@ -44,9 +48,66 @@ const COL = {
 const REMINDER_MIN_MS = 5  * 60 * 1000;
 const REMINDER_MAX_MS = 24 * 60 * 60 * 1000;
 
+// Email identity for outbound mail. The script owner must have this
+// address configured as a "Send mail as" alias in their Gmail settings
+// (gmail.com → ⚙ → See all settings → Accounts → Send mail as → Add
+// another email address). Otherwise GmailApp will fall back to the
+// script owner's address.
+const REMINDER_FROM_EMAIL = 'bouncebackpickle@gmail.com';
+const REMINDER_FROM_NAME  = 'BounceBack Pickle';
+
+// ───────────────────────────────────────────────────────────────────────
+// Retry wrapper for transient Google Sheets / Apps Script storage errors.
+//
+// Google occasionally throws "We're sorry, a server error occurred while
+// reading from storage. Error code INTERNAL." on perfectly valid calls.
+// It's a known transient issue. Retrying 2x with backoff fixes ~99% of them.
+//
+// Usage:
+//   const sheet = withRetry(() => SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(), 'getSheet');
+//   const data  = withRetry(() => sheet.getDataRange().getValues(), 'getValues');
+//   withRetry(() => sheet.getRange(row, col).setValue(val), 'setValue');
+// ───────────────────────────────────────────────────────────────────────
+function withRetry(fn, label, maxAttempts) {
+  const attempts = maxAttempts || 3;          // 1 try + 2 retries
+  let lastErr = null;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      return fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = (err && err.message) ? err.message : String(err);
+      const transient =
+        msg.indexOf('INTERNAL')                   !== -1 ||
+        msg.indexOf('reading from storage')       !== -1 ||
+        msg.indexOf('Service unavailable')        !== -1 ||
+        msg.indexOf('Service Spreadsheets failed')!== -1 ||
+        msg.indexOf('try again')                  !== -1 ||
+        msg.indexOf('temporarily unavailable')    !== -1;
+
+      if (!transient || attempt === attempts) {
+        console.error('[BounceBack] withRetry(' + label + ') failed attempt ' + attempt + '/' + attempts + ':', msg);
+        throw err;
+      }
+
+      // Exponential backoff: 500ms, 1500ms.
+      const wait = 500 * Math.pow(3, attempt - 1);
+      console.log('[BounceBack] withRetry(' + label + ') transient error attempt ' + attempt + '/' + attempts + ' — sleeping ' + wait + 'ms:', msg);
+      Utilities.sleep(wait);
+    }
+  }
+  throw lastErr;
+}
+
 function checkForNewSubscribers() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data  = sheet.getDataRange().getValues();
+  const sheet = withRetry(
+    () => SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(),
+    'checkForNewSubscribers:getSheet'
+  );
+  const data = withRetry(
+    () => sheet.getDataRange().getValues(),
+    'checkForNewSubscribers:getValues'
+  );
 
   for (let i = 1; i < data.length; i++) {
     const row    = data[i];
@@ -87,7 +148,10 @@ function checkForNewSubscribers() {
       console.log(`[BounceBack] Row ${i + 1} response ${code}:`, body);
 
       if (code === 200) {
-        sheet.getRange(i + 1, COL.email1Sent).setValue(new Date());
+        withRetry(
+          () => sheet.getRange(i + 1, COL.email1Sent).setValue(new Date()),
+          'checkForNewSubscribers:setEmail1Sent'
+        );
         console.log(`[BounceBack] Success — facility created for row ${i + 1}`);
       } else {
         console.error(`[BounceBack] Failed row ${i + 1} — ${code}: ${body}`);
@@ -110,9 +174,15 @@ function checkForNewSubscribers() {
  *   Type: Minutes timer → Every 5 minutes → Save.
  */
 function sendPaymentReminders() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data  = sheet.getDataRange().getValues();
-  const now   = Date.now();
+  const sheet = withRetry(
+    () => SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(),
+    'sendPaymentReminders:getSheet'
+  );
+  const data = withRetry(
+    () => sheet.getDataRange().getValues(),
+    'sendPaymentReminders:getValues'
+  );
+  const now = Date.now();
 
   for (let i = 1; i < data.length; i++) {
     const row             = data[i];
@@ -135,7 +205,10 @@ function sendPaymentReminders() {
     if (elapsed > REMINDER_MAX_MS) continue;
 
     // Pull the real URL out of the HYPERLINK formula in col O.
-    const formula = sheet.getRange(i + 1, COL.paymentLink).getFormula();
+    const formula = withRetry(
+      () => sheet.getRange(i + 1, COL.paymentLink).getFormula(),
+      'sendPaymentReminders:getFormula'
+    );
     let url = '';
     if (formula) {
       const match = formula.match(/HYPERLINK\(\s*"([^"]+)"/);
@@ -145,19 +218,68 @@ function sendPaymentReminders() {
     }
     if (!url) continue;
 
-    const subject = 'Finish your BounceBack Pickle membership';
+    const subject = 'Finish your BounceBack Sustainable Facility enrollment';
+    const greeting = 'Hey ' + (firstName || 'there') + ',';
+
+    // Plain text fallback for clients that strip HTML.
     const body =
-      'Hi ' + (firstName || 'there') + ',\n\n' +
-      'Thanks for starting your Sustainable Facility Accreditation Membership' +
-      (facilityName ? ' for ' + facilityName : '') + '. ' +
-      'It looks like checkout didn\'t finish on your end.\n\n' +
-      'Pick up where you left off here:\n' + url + '\n\n' +
-      'Reply to this email if you have any questions or hit a snag.\n\n' +
-      'The BounceBack Pickle Team';
+      greeting + '\n\n' +
+      'You made it through our Sustainable Facility Program form, which tells me you\'re serious about making your facility more sustainable, so I don\'t want anything to get in the way of that.\n\n' +
+      'If you have any questions before completing your enrollment, I\'m happy to help over the phone or email. Here\'s what you get as a Sustainable Facility Partner:\n\n' +
+      '- Branded recycling bin shipped to your facility\n' +
+      '- Sustainable Facility Accreditation Certificate\n' +
+      '- Certified sustainable marketing rights\n' +
+      '- Listed on the BounceBack partner directory\n' +
+      '- First access + exclusive pricing on the world\'s first 100% recycled pickleball\n\n' +
+      'All for just $150/year — join a growing network of facilities making America\'s fastest-growing sport sustainable.\n\n' +
+      'If you\'re ready to lock it in, here\'s your link: ' + url + '\n\n' +
+      'Just reply here and I\'ll get back to you same day.\n\n' +
+      'Talk soon,\n' +
+      'Dillon Rosenthal\n' +
+      'Founder, BounceBack Pickle\n' +
+      '941-806-7933';
+
+    // HTML version — table-based for Gmail/Outlook compatibility.
+    const htmlBody =
+      '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a;max-width:560px;margin:0 auto;padding:24px 16px;">' +
+        '<p style="margin:0 0 16px 0;">' + greeting + '</p>' +
+        '<p style="margin:0 0 16px 0;">You made it through our Sustainable Facility Program form, which tells me you\'re serious about making your facility more sustainable, so I don\'t want anything to get in the way of that.</p>' +
+        '<p style="margin:0 0 12px 0;">If you have any questions before completing your enrollment, I\'m happy to help over the phone or email. Here\'s what you get as a Sustainable Facility Partner:</p>' +
+        '<ul style="margin:0 0 16px 0;padding-left:22px;">' +
+          '<li style="margin:0 0 6px 0;">Branded recycling bin shipped to your facility</li>' +
+          '<li style="margin:0 0 6px 0;">Sustainable Facility Accreditation Certificate</li>' +
+          '<li style="margin:0 0 6px 0;">Certified sustainable marketing rights</li>' +
+          '<li style="margin:0 0 6px 0;">Listed on the BounceBack partner directory</li>' +
+          '<li style="margin:0 0 0 0;">First access + exclusive pricing on the world\'s first 100% recycled pickleball</li>' +
+        '</ul>' +
+        '<p style="margin:0 0 24px 0;">All for just <strong>$150/year</strong> — join a growing network of facilities making America\'s fastest-growing sport sustainable.</p>' +
+        '<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0;">' +
+          '<tr><td style="border-radius:6px;background-color:#084734;">' +
+            '<a href="' + url + '" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;letter-spacing:0.04em;color:#FBFFF1;text-decoration:none;border-radius:6px;">Complete enrollment</a>' +
+          '</td></tr>' +
+        '</table>' +
+        '<p style="margin:0 0 16px 0;color:#555;font-size:13px;">Or paste this link into your browser:<br><a href="' + url + '" style="color:#084734;word-break:break-all;">' + url + '</a></p>' +
+        '<p style="margin:0 0 24px 0;">Just reply here and I\'ll get back to you same day.</p>' +
+        '<p style="margin:0;">Talk soon,<br>' +
+          '<strong>Dillon Rosenthal</strong><br>' +
+          'Founder, BounceBack Pickle<br>' +
+          '<a href="tel:+19418067933" style="color:#084734;text-decoration:none;">941-806-7933</a>' +
+        '</p>' +
+      '</div>';
 
     try {
-      MailApp.sendEmail({ to: email, subject: subject, body: body });
-      sheet.getRange(i + 1, COL.paymentReminderSent).setValue(new Date());
+      // GmailApp lets us set `from` to a configured send-as alias so the
+      // recipient sees bouncebackpickle@gmail.com — not the script owner.
+      GmailApp.sendEmail(email, subject, body, {
+        from:     REMINDER_FROM_EMAIL,
+        name:     REMINDER_FROM_NAME,
+        replyTo:  REMINDER_FROM_EMAIL,
+        htmlBody: htmlBody,
+      });
+      withRetry(
+        () => sheet.getRange(i + 1, COL.paymentReminderSent).setValue(new Date()),
+        'sendPaymentReminders:setReminderSent'
+      );
       console.log('[BounceBack] Reminder sent to', email, 'row', i + 1);
     } catch (err) {
       console.error('[BounceBack] Reminder failed row', i + 1, ':', err.message);
@@ -171,23 +293,26 @@ const WEBSITE_MIN_ROW = 2;
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    const sheet = withRetry(
+      () => SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(),
+      'doPost:getSheet'
+    );
     const action = data.action;
 
     if (action === 'facility') {
-      const lastRow = sheet.getLastRow();
+      const lastRow = withRetry(() => sheet.getLastRow(), 'doPost:facility:getLastRow');
       const targetRow = Math.max(lastRow + 1, WEBSITE_MIN_ROW);
 
-      sheet.getRange(targetRow, 1 ).setValue(new Date());                  // A  Timestamp
-      sheet.getRange(targetRow, 2 ).setValue(data.firstName     || '');    // B  First Name
-      sheet.getRange(targetRow, 3 ).setValue(data.lastName      || '');    // C  Last Name
-      sheet.getRange(targetRow, 4 ).setValue(data.phone         || '');    // D  Phone
-      sheet.getRange(targetRow, 6 ).setValue(data.facilityName  || '');    // F  Facility Name
-      sheet.getRange(targetRow, 7 ).setValue(data.streetAddress || '');    // G  Street
-      sheet.getRange(targetRow, 8 ).setValue(data.city          || '');    // H  City
-      sheet.getRange(targetRow, 9 ).setValue(data.state         || '');    // I  State
-      sheet.getRange(targetRow, 10).setValue(data.zipCode       || '');    // J  Zip
-      sheet.getRange(targetRow, 14).setValue(data.email         || '');    // N  Email
+      withRetry(() => sheet.getRange(targetRow, 1 ).setValue(new Date()),                  'doPost:facility:A');  // A  Timestamp
+      withRetry(() => sheet.getRange(targetRow, 2 ).setValue(data.firstName     || ''),    'doPost:facility:B');  // B  First Name
+      withRetry(() => sheet.getRange(targetRow, 3 ).setValue(data.lastName      || ''),    'doPost:facility:C');  // C  Last Name
+      withRetry(() => sheet.getRange(targetRow, 4 ).setValue(data.phone         || ''),    'doPost:facility:D');  // D  Phone
+      withRetry(() => sheet.getRange(targetRow, 6 ).setValue(data.facilityName  || ''),    'doPost:facility:F');  // F  Facility Name
+      withRetry(() => sheet.getRange(targetRow, 7 ).setValue(data.streetAddress || ''),    'doPost:facility:G');  // G  Street
+      withRetry(() => sheet.getRange(targetRow, 8 ).setValue(data.city          || ''),    'doPost:facility:H');  // H  City
+      withRetry(() => sheet.getRange(targetRow, 9 ).setValue(data.state         || ''),    'doPost:facility:I');  // I  State
+      withRetry(() => sheet.getRange(targetRow, 10).setValue(data.zipCode       || ''),    'doPost:facility:J');  // J  Zip
+      withRetry(() => sheet.getRange(targetRow, 14).setValue(data.email         || ''),    'doPost:facility:N');  // N  Email
 
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true, rowNumber: targetRow }))
@@ -201,9 +326,9 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
       }
-      sheet.getRange(rowNumber, 11).setValue(data.additionalBins || '');           // K  Additional bins
-      sheet.getRange(rowNumber, 12).setValue(data.agreedTerms   ? 'Yes' : 'No');   // L  Agreed Terms
-      sheet.getRange(rowNumber, 13).setValue(data.agreedUpdates ? 'Yes' : 'No');   // M  Wants Updates
+      withRetry(() => sheet.getRange(rowNumber, 11).setValue(data.additionalBins || ''),           'doPost:program:K');  // K  Additional bins
+      withRetry(() => sheet.getRange(rowNumber, 12).setValue(data.agreedTerms   ? 'Yes' : 'No'),   'doPost:program:L');  // L  Agreed Terms
+      withRetry(() => sheet.getRange(rowNumber, 13).setValue(data.agreedUpdates ? 'Yes' : 'No'),   'doPost:program:M');  // M  Wants Updates
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -216,8 +341,8 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
       }
-      sheet.getRange(rowNumber, 18).setValue('checkout-started');                  // R  Payable Status
-      sheet.getRange(rowNumber, 21).setValue(new Date());                          // U  Payable Last Update
+      withRetry(() => sheet.getRange(rowNumber, 18).setValue('checkout-started'), 'doPost:checkout-started:R');  // R  Payable Status
+      withRetry(() => sheet.getRange(rowNumber, 21).setValue(new Date()),         'doPost:checkout-started:U');  // U  Payable Last Update
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -230,12 +355,14 @@ function doPost(e) {
           .createTextOutput(JSON.stringify({ ok: false, error: 'invalid rowNumber' }))
           .setMimeType(ContentService.MimeType.JSON);
       }
-      if (data.orderId) sheet.getRange(rowNumber, 16).setValue(data.orderId);      // P  Order ID
-      if (data.total != null) {
-        sheet.getRange(rowNumber, 17).setValue(data.total / 100);                  // Q  Total ($)
+      if (data.orderId) {
+        withRetry(() => sheet.getRange(rowNumber, 16).setValue(data.orderId), 'doPost:subscribed:P');           // P  Order ID
       }
-      sheet.getRange(rowNumber, 18).setValue('subscribed');                        // R  Payable Status
-      sheet.getRange(rowNumber, 21).setValue(new Date());                          // U  Payable Last Update
+      if (data.total != null) {
+        withRetry(() => sheet.getRange(rowNumber, 17).setValue(data.total / 100), 'doPost:subscribed:Q');       // Q  Total ($)
+      }
+      withRetry(() => sheet.getRange(rowNumber, 18).setValue('subscribed'), 'doPost:subscribed:R');             // R  Payable Status
+      withRetry(() => sheet.getRange(rowNumber, 21).setValue(new Date()),   'doPost:subscribed:U');             // U  Payable Last Update
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -251,9 +378,15 @@ function doPost(e) {
       const url = (data.paymentUrl || '').toString().replace(/"/g, '');
       const label = (data.paymentLabel || 'Pay link').toString().replace(/"/g, '');
       if (url) {
-        sheet.getRange(rowNumber, 15).setFormula('=HYPERLINK("' + url + '","' + label + '")'); // O  To join — click below
+        withRetry(
+          () => sheet.getRange(rowNumber, 15).setFormula('=HYPERLINK("' + url + '","' + label + '")'),
+          'doPost:save-payment-link:O-formula'
+        );
       } else {
-        sheet.getRange(rowNumber, 15).setValue('');
+        withRetry(
+          () => sheet.getRange(rowNumber, 15).setValue(''),
+          'doPost:save-payment-link:O-clear'
+        );
       }
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
@@ -268,8 +401,8 @@ function doPost(e) {
           .setMimeType(ContentService.MimeType.JSON);
       }
       // Clear "checkout-started" so the row doesn't look like they paid.
-      sheet.getRange(rowNumber, 18).setValue('');                                  // R  Payable Status
-      sheet.getRange(rowNumber, 21).setValue(new Date());                          // U  Payable Last Update
+      withRetry(() => sheet.getRange(rowNumber, 18).setValue(''),         'doPost:checkout-canceled:R');  // R  Payable Status
+      withRetry(() => sheet.getRange(rowNumber, 21).setValue(new Date()), 'doPost:checkout-canceled:U');  // U  Payable Last Update
       return ContentService
         .createTextOutput(JSON.stringify({ ok: true }))
         .setMimeType(ContentService.MimeType.JSON);

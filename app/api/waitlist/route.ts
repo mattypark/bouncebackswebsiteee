@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 
 // Simple in-memory rate limiting (per serverless instance)
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -29,20 +28,16 @@ export async function POST(req: Request) {
     );
   }
 
-  // Use service role key to bypass RLS (server-side only, never exposed to browser)
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) {
-    console.error("Missing SUPABASE_SERVICE_ROLE_KEY env var");
+  // Kit (ConvertKit) config — server-side only, never exposed to browser
+  const apiKey = process.env.KIT_API_KEY;
+  const formId = process.env.KIT_FORM_ID;
+  if (!apiKey || !formId) {
+    console.error("Missing KIT_API_KEY or KIT_FORM_ID env var");
     return NextResponse.json(
       { error: "Server configuration error." },
       { status: 500 }
     );
   }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceKey
-  );
 
   let body;
   try {
@@ -65,27 +60,28 @@ export async function POST(req: Request) {
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Check for duplicate
-  const { data: existing } = await supabase
-    .from("waitlist")
-    .select("id")
-    .eq("email", normalizedEmail)
-    .maybeSingle();
+  // Add subscriber to the Kit form. Kit dedupes by email automatically,
+  // so re-submitting an existing email succeeds (no duplicate created).
+  try {
+    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Kit-Api-Key": apiKey,
+      },
+      body: JSON.stringify({ email_address: normalizedEmail }),
+    });
 
-  if (existing) {
-    return NextResponse.json(
-      { error: "You're already on the waitlist!" },
-      { status: 409 }
-    );
-  }
-
-  // Insert into waitlist table
-  const { error: dbError } = await supabase
-    .from("waitlist")
-    .insert({ email: normalizedEmail });
-
-  if (dbError) {
-    console.error("Waitlist insert error:", dbError);
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error("Kit subscribe error:", res.status, detail);
+      return NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: 500 }
+      );
+    }
+  } catch (err) {
+    console.error("Kit subscribe request failed:", err);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 }
