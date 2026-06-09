@@ -44,9 +44,9 @@ const COL = {
 
 // Time window for the payment reminder.
 // Don't email before 5 minutes (they may still be on Stripe) or after
-// 24 hours (avoid spamming people who decided not to join days later).
+// 7 days (wide enough to catch rows missed during outages / permission bugs).
 const REMINDER_MIN_MS = 5  * 60 * 1000;
-const REMINDER_MAX_MS = 24 * 60 * 60 * 1000;
+const REMINDER_MAX_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Email identity for outbound mail. The script owner must have this
 // address configured as a "Send mail as" alias in their Gmail settings

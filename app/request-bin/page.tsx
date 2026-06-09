@@ -112,6 +112,38 @@ export default function RequestBinPage() {
   const restoredRef = useRef(false);
   const savedToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Retry-capable helper for generating the Stripe payment link.
+  // Retries once after 2s on failure so a cold-start or transient error
+  // doesn't permanently leave col O empty.
+  function generatePaymentLink(rowNumber: number) {
+    const payload = {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      facilityName: formData.facilityName,
+      additionalBins: formData.additionalBins,
+      rowNumber,
+    };
+    const attempt = () =>
+      fetch("/api/stripe-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then((r) => {
+        if (!r.ok) throw new Error(`stripe-checkout ${r.status}`);
+        return r;
+      });
+
+    attempt().catch((err) => {
+      console.error("Payment link attempt 1 failed:", err);
+      setTimeout(() => {
+        attempt().catch((err2) =>
+          console.error("Payment link attempt 2 failed:", err2)
+        );
+      }, 2000);
+    });
+  }
+
   function flashSaved() {
     setSaveStatus("saved");
     if (savedToastTimerRef.current) clearTimeout(savedToastTimerRef.current);
@@ -330,19 +362,8 @@ export default function RequestBinPage() {
       // info is saved — so every saved row gets a payment link in col O,
       // even if they drop off before step 3. If they add bins in step 3,
       // that pre-gen overwrites col O with the bin-inclusive link.
-      // Fire-and-forget — never block advancing the form.
-      fetch("/api/stripe-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          facilityName: formData.facilityName,
-          additionalBins: formData.additionalBins,
-          rowNumber: data.rowNumber,
-        }),
-      }).catch(() => {});
+      // Retries once on failure so transient errors don't leave col O empty.
+      generatePaymentLink(data.rowNumber);
 
       return data.rowNumber as number;
     })();
@@ -403,22 +424,9 @@ export default function RequestBinPage() {
           body: JSON.stringify(formData),
         }).catch(() => {});
 
-        // Pre-generate a Stripe Checkout Session so the link lands in the
-        // sheet (col O) even for facilities that drop off before clicking
-        // Pay. The backend writes session.url to col O before responding.
-        // Fire-and-forget — we don't redirect from here.
-        fetch("/api/stripe-checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            facilityName: formData.facilityName,
-            additionalBins: formData.additionalBins,
-            rowNumber,
-          }),
-        }).catch(() => {});
+        // Re-generate the Stripe link with final bin selection so col O
+        // has the correct amount. Retries once on failure.
+        generatePaymentLink(rowNumber);
       } catch {
         setSaveStatus("error"); setError("Something went wrong saving your selections.");
       }
@@ -526,8 +534,8 @@ export default function RequestBinPage() {
               <h2 className="text-2xl font-bold text-white">You&apos;re in.</h2>
               <p className="mt-3 text-sm leading-relaxed text-white/60">
                 Your facility info is saved. We sent a confirmation to{" "}
-                <span className="font-semibold text-white">{formData.email}</span>. Dillon
-                will reach out shortly with next steps to finalize your membership.
+                <span className="font-semibold text-white">{formData.email}</span>. Our
+                team will reach out shortly with next steps to finalize your membership.
               </p>
             </div>
           ) : (
@@ -999,7 +1007,7 @@ export default function RequestBinPage() {
                         </svg>
                         <span>
                           <span className="font-semibold">Your info is saved.</span> If you
-                          can&apos;t complete payment right now, Dillon will follow up with
+                          can&apos;t complete payment right now, our team will follow up with
                           billing details — no need to redo this form.
                         </span>
                       </div>
@@ -1066,7 +1074,7 @@ export default function RequestBinPage() {
                       <div className="rounded-xl bg-bb-deep px-5 py-4 text-sm leading-relaxed text-white/90">
                         Payment isn&apos;t available online yet — but{" "}
                         <span className="font-semibold text-white">your info is saved</span>
-                        . Dillon will reach out shortly with payment details. You can close
+                        . Our team will reach out shortly with payment details. You can close
                         this tab or click below to finish.
                       </div>
                     ) : null}
