@@ -160,6 +160,20 @@ export default function WaitlistSection() {
             </p>
           )}
         </form>
+
+        {/* Brand mark */}
+        <div className="mt-16 flex flex-col items-center gap-3 md:mt-20">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bbbblogo.png"
+            alt="BounceBack Pickle logo"
+            className="h-auto w-[130px] md:w-[160px]"
+          />
+          <p className="max-w-sm text-xs leading-relaxed text-black/40">
+            BounceBack Pickle — pickleball recycling services and recycled
+            pickleballs.
+          </p>
+        </div>
       </div>
     </section>
   );

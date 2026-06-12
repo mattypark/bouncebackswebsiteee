@@ -122,6 +122,17 @@ export default function PreorderPacksSection({
         </h2>
       )}
 
+      {/* Brand mark — shown at point of sale */}
+      <div className="mb-8 flex justify-center">
+        <Image
+          src="/bbbblogo.png"
+          alt="BounceBack Pickle logo"
+          width={140}
+          height={140}
+          className="h-auto w-[110px] md:w-[140px]"
+        />
+      </div>
+
       {/* Preorder banner — visible above the pack grid */}
       <div className="glass-card mx-auto mb-8 max-w-3xl rounded-2xl px-6 py-5 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.15em] text-bb-deep">
