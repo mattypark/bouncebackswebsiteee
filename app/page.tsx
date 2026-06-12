@@ -6,13 +6,11 @@ import TheProcessSection from "@/components/TheProcessSection";
 import WhyChooseSection from "@/components/WhyChooseSection";
 
 import WaitlistSection from "@/components/WaitlistSection";
-import SmoothScroll from "@/components/SmoothScroll";
 import PreorderPacksSection from "@/components/PreorderPacksSection";
 
 export default function Home() {
   return (
     <>
-      <SmoothScroll />
       <HeroSection />
       {/* Gradient canvas — packs + storytelling share one clean gradient */}
       <div className="bb-gradient w-full">

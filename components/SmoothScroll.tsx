@@ -32,6 +32,18 @@ export default function SmoothScroll() {
     }
 
     function onKeyDown(e: KeyboardEvent) {
+      // Don't hijack keys while typing in form fields
+      const t = e.target as HTMLElement | null;
+      if (
+        t &&
+        (t.tagName === "INPUT" ||
+          t.tagName === "TEXTAREA" ||
+          t.tagName === "SELECT" ||
+          t.isContentEditable)
+      ) {
+        return;
+      }
+
       const scrollAmount = window.innerHeight * 0.8;
       if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
         e.preventDefault();
