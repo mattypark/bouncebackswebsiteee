@@ -259,10 +259,10 @@ export default function HeroSection() {
               href="/bb-1"
               className="relative inline-block select-none"
             >
-              <span className="inline-block border-2 border-white px-5 py-2.5 text-[10px] font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep">
+              <span className="inline-block border-2 border-bb-lime bg-bb-lime px-5 py-2.5 text-[10px] font-bold tracking-[0.15em] text-bb-deep shadow-[0_0_24px_rgba(206,241,123,0.45)] transition-all duration-300 hover:bg-white hover:border-white">
                 PREORDER BB-1
               </span>
-              <span className="absolute -top-2 -right-2 rotate-[8deg] rounded-sm bg-bb-lime px-1.5 py-0.5 text-[8px] font-bold tracking-[0.15em] text-bb-deep shadow">
+              <span className="absolute -top-2 -right-2 rotate-[8deg] rounded-sm bg-white px-1.5 py-0.5 text-[8px] font-bold tracking-[0.15em] text-bb-deep shadow">
                 NEW
               </span>
             </a>
@@ -318,10 +318,10 @@ export default function HeroSection() {
               href="/bb-1"
               className="relative inline-block select-none"
             >
-              <span className="inline-block border-2 border-white px-8 py-3.5 text-xs font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep">
+              <span className="inline-block border-2 border-bb-lime bg-bb-lime px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-bb-deep shadow-[0_0_32px_rgba(206,241,123,0.45)] transition-all duration-300 hover:bg-white hover:border-white">
                 PREORDER BB-1
               </span>
-              <span className="absolute -top-2.5 -right-2.5 rotate-[8deg] rounded-sm bg-bb-lime px-2 py-0.5 text-[9px] font-bold tracking-[0.15em] text-bb-deep shadow">
+              <span className="absolute -top-2.5 -right-2.5 rotate-[8deg] rounded-sm bg-white px-2 py-0.5 text-[9px] font-bold tracking-[0.15em] text-bb-deep shadow">
                 NEW
               </span>
             </a>

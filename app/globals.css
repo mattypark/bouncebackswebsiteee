@@ -132,6 +132,43 @@
     180deg,
     #084734 0%,
     #084734 68%,
-    #FBFFF1 100%
+    #CEF17B 100%
   );
+}
+
+/* Clean multi-tone gradient — light green base with soft white
+   highlights and deep green shading. Used behind the storytelling
+   sections so the page never sits on a single flat color. */
+.bb-gradient {
+  /* Edge colors are pinned: top = #CEF17B (matches hero fade end),
+     bottom = #DFF7AB (matches .bb-gradient-light top) so section
+     boundaries blend with no visible dividing line. Highlight blobs
+     stay away from the top/bottom edges. */
+  background:
+    radial-gradient(70% 38% at 20% 30%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(70% 38% at 85% 50%, rgba(8, 71, 52, 0.14) 0%, rgba(8, 71, 52, 0) 60%),
+    radial-gradient(68% 35% at 15% 72%, rgba(101, 190, 68, 0.22) 0%, rgba(101, 190, 68, 0) 60%),
+    linear-gradient(180deg, #CEF17B 0%, #D7F492 38%, #C6EC74 70%, #DFF7AB 100%);
+}
+
+/* Lighter variant — white into mint into light green.
+   Used for "How does it work?" and other cream sections. */
+.bb-gradient-light {
+  /* Top = #DFF7AB (continues .bb-gradient bottom), bottom = #FBFFF1
+     (matches the cream sections that follow). */
+  background:
+    radial-gradient(75% 38% at 80% 32%, rgba(206, 241, 123, 0.32) 0%, rgba(206, 241, 123, 0) 60%),
+    radial-gradient(68% 35% at 12% 62%, rgba(101, 190, 68, 0.12) 0%, rgba(101, 190, 68, 0) 60%),
+    linear-gradient(180deg, #DFF7AB 0%, #EFFBDA 40%, #F7FDE7 75%, #FBFFF1 100%);
+}
+
+/* Frosted glass surface for cards and feature boxes */
+.glass-card {
+  background: rgba(255, 255, 255, 0.38);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 8px 32px rgba(8, 71, 52, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }

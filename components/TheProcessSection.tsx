@@ -133,7 +133,7 @@ export default function TheProcessSection() {
   const arrowOffset = `${active * 100}%`;
 
   return (
-    <section className="process-section relative w-full bg-bb-cream">
+    <section className="process-section bb-gradient-light relative w-full">
       <div className="process-track" ref={trackRef}>
         <div className="process-sticky">
           <div className="mx-auto w-full max-w-7xl px-6 md:px-10">

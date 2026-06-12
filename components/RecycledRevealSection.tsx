@@ -66,7 +66,7 @@ export default function RecycledRevealSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-bb-lime py-24 md:py-32 lg:py-40"
+      className="relative w-full overflow-hidden py-24 md:py-32 lg:py-40"
     >
       {/* Headline — single line, word-by-word scroll reveal */}
       <div className="mx-auto mb-16 px-8 md:mb-20 md:px-14 lg:px-20">

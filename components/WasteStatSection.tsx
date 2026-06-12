@@ -153,7 +153,7 @@ export default function WasteStatSection() {
 
       <style jsx>{`
         .waste-stat-section {
-          background: #CEF17B;
+          background: transparent;
         }
 
         .waste-stat-eyebrow,
