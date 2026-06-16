@@ -245,6 +245,26 @@ const LOCATION_DATA: StateData[] = [
       { name: "Premier Pickleball Academy", city: "Oklahoma City", nonprofit: false, coords: [-97.49, 35.41] },
     ],
   },
+  {
+    fips: "26",
+    abbr: "MI",
+    name: "Michigan",
+    coords: [-84.8, 44.3],
+    zoomLevel: 4,
+    locations: [
+      { name: "Northville Pickleball Club", city: "Northville", nonprofit: false, coords: [-83.48, 42.43] },
+    ],
+  },
+  {
+    fips: "17",
+    abbr: "IL",
+    name: "Illinois",
+    coords: [-89.2, 40.0],
+    zoomLevel: 4,
+    locations: [
+      { name: "Quad City Tennis Club", city: "Moline", nonprofit: false, coords: [-90.48, 41.49] },
+    ],
+  },
 ];
 
 /* ───────────────────────────────────────────── */
