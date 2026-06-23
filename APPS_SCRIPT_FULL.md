@@ -13,7 +13,7 @@ includes:
   bug that occasionally hits both timers and `doPost`)
 - `checkForNewSubscribers` (existing timer-driven function that forwards
   `subscribed` rows to the shipping backend)
-- `sendPaymentReminders` (timer-driven Gmail follow-up)
+- `sendPaymentReminders` (timer-driven payment follow-up, sent via Resend)
 - `WEBSITE_MIN_ROW` constant for website-driven rows
 - `doPost` handling all 6 actions from the website + Stripe pipeline
 - `doGet` health check
@@ -43,18 +43,20 @@ const COL = {
 };
 
 // Time window for the payment reminder.
-// Don't email before 5 minutes (they may still be on Stripe) or after
-// 7 days (wide enough to catch rows missed during outages / permission bugs).
-const REMINDER_MIN_MS = 5  * 60 * 1000;
+// No minimum wait — fire on the next timer run after signup. Cap at
+// 7 days so we don't email very old unpaid rows.
+const REMINDER_MIN_MS = 0;
 const REMINDER_MAX_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Email identity for outbound mail. The script owner must have this
-// address configured as a "Send mail as" alias in their Gmail settings
-// (gmail.com → ⚙ → See all settings → Accounts → Send mail as → Add
-// another email address). Otherwise GmailApp will fall back to the
-// script owner's address.
-const REMINDER_FROM_EMAIL = 'bouncebackpickle@gmail.com';
-const REMINDER_FROM_NAME  = 'BounceBack Pickle';
+// Outbound mail goes through Resend (same verified domain the backend
+// contact form uses: bouncebackpickle.com). The API key is NOT hardcoded —
+// set it once in Apps Script → Project Settings (gear) → Script Properties:
+//   RESEND_API_KEY = re_xxxxxxxx
+// `recycle@bouncebackpickle.com` is the verified Resend sender. Replies route
+// to Dillon's inbox so "reply for a fresh link" lands somewhere real.
+const RESEND_API_URL    = 'https://api.resend.com/emails';
+const REMINDER_FROM     = 'Dillon Rosenthal <recycle@bouncebackpickle.com>';
+const REMINDER_REPLY_TO = 'Bouncebackpickle@gmail.com';
 
 // ───────────────────────────────────────────────────────────────────────
 // Retry wrapper for transient Google Sheets / Apps Script storage errors.
@@ -165,8 +167,8 @@ function checkForNewSubscribers() {
 /**
  * Sends a follow-up email with the Stripe payment link to anyone who got
  * a link generated (col O) but hasn't paid yet (col R != "subscribed").
- * Only fires 5 min – 24 hr after they signed up. Marks col AA so they
- * only get one reminder.
+ * Fires on the next timer run after signup (no minimum wait), up to 7 days
+ * out. Marks col AA so they only get one reminder.
  *
  * Set up a time-driven trigger to run this every 5 minutes:
  *   Apps Script editor → Triggers (clock icon) → Add Trigger →
@@ -218,69 +220,82 @@ function sendPaymentReminders() {
     }
     if (!url) continue;
 
-    const subject = 'Finish your BounceBack Sustainable Facility enrollment';
-    const greeting = 'Hey ' + (firstName || 'there') + ',';
+    const name = firstName || 'there';
+    const subject = 'You\'re one step away, ' + name;
 
     // Plain text fallback for clients that strip HTML.
     const body =
-      greeting + '\n\n' +
-      'You made it through our Sustainable Facility Program form, which tells me you\'re serious about making your facility more sustainable, so I don\'t want anything to get in the way of that.\n\n' +
-      'If you have any questions before completing your enrollment, I\'m happy to help over the phone or email. Here\'s what you get as a Sustainable Facility Partner:\n\n' +
-      '- Branded recycling bin shipped to your facility\n' +
-      '- Sustainable Facility Accreditation Certificate\n' +
-      '- Certified sustainable marketing rights\n' +
-      '- Listed on the BounceBack partner directory\n' +
-      '- First access + exclusive pricing on the world\'s first 100% recycled pickleball\n\n' +
-      'All for just $150/year — join a growing network of facilities making America\'s fastest-growing sport sustainable.\n\n' +
-      'If you\'re ready to lock it in, here\'s your link: ' + url + '\n\n' +
-      'Just reply here and I\'ll get back to you same day.\n\n' +
-      'Talk soon,\n' +
+      'Hey ' + name + ',\n\n' +
+      'This is Dillon from BounceBack Pickle. Thank you so much for looking into joining the BounceBack Sustainable Facility Program.\n\n' +
+      'Things here are moving fast. We\'re scaling across the US and working to turn the country\'s fastest-growing sport into its first sustainable one.\n\n' +
+      'I noticed you filled out most of the form, but didn\'t finish the final step. We\'d love to have you. As a member, you\'ll get the Sustainable Facility Accreditation along with discounted pricing on the world\'s first recycled pickleball, inclusion in our marketing network, and the satisfaction of helping keep pickleball plastic out of landfills.\n\n' +
+      'You can finish your membership here:\n\n' +
+      url + '\n\n' +
+      'Heads up: the link is active for 24 hours. If it expires, reply, and I\'ll send you a fresh one.\n\n' +
+      'Any questions, reach out anytime. Excited to have you in the movement.\n\n' +
+      'Best,\n' +
       'Dillon Rosenthal\n' +
       'Founder, BounceBack Pickle\n' +
-      '941-806-7933';
+      'www.bouncebackpickle.com';
 
     // HTML version — table-based for Gmail/Outlook compatibility.
     const htmlBody =
       '<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a;max-width:560px;margin:0 auto;padding:24px 16px;">' +
-        '<p style="margin:0 0 16px 0;">' + greeting + '</p>' +
-        '<p style="margin:0 0 16px 0;">You made it through our Sustainable Facility Program form, which tells me you\'re serious about making your facility more sustainable, so I don\'t want anything to get in the way of that.</p>' +
-        '<p style="margin:0 0 12px 0;">If you have any questions before completing your enrollment, I\'m happy to help over the phone or email. Here\'s what you get as a Sustainable Facility Partner:</p>' +
-        '<ul style="margin:0 0 16px 0;padding-left:22px;">' +
-          '<li style="margin:0 0 6px 0;">Branded recycling bin shipped to your facility</li>' +
-          '<li style="margin:0 0 6px 0;">Sustainable Facility Accreditation Certificate</li>' +
-          '<li style="margin:0 0 6px 0;">Certified sustainable marketing rights</li>' +
-          '<li style="margin:0 0 6px 0;">Listed on the BounceBack partner directory</li>' +
-          '<li style="margin:0 0 0 0;">First access + exclusive pricing on the world\'s first 100% recycled pickleball</li>' +
-        '</ul>' +
-        '<p style="margin:0 0 24px 0;">All for just <strong>$150/year</strong> — join a growing network of facilities making America\'s fastest-growing sport sustainable.</p>' +
-        '<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0;">' +
+        '<p style="margin:0 0 16px 0;">Hey ' + name + ',</p>' +
+        '<p style="margin:0 0 16px 0;">This is Dillon from BounceBack Pickle. Thank you so much for looking into joining the BounceBack Sustainable Facility Program.</p>' +
+        '<p style="margin:0 0 16px 0;">Things here are moving fast. We\'re scaling across the US and working to turn the country\'s fastest-growing sport into its first sustainable one.</p>' +
+        '<p style="margin:0 0 16px 0;">I noticed you filled out most of the form, but didn\'t finish the final step. We\'d love to have you. As a member, you\'ll get the Sustainable Facility Accreditation along with discounted pricing on the world\'s first recycled pickleball, inclusion in our marketing network, and the satisfaction of helping keep pickleball plastic out of landfills.</p>' +
+        '<p style="margin:0 0 20px 0;">You can finish your membership here:</p>' +
+        '<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px 0;">' +
           '<tr><td style="border-radius:6px;background-color:#084734;">' +
-            '<a href="' + url + '" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;letter-spacing:0.04em;color:#FBFFF1;text-decoration:none;border-radius:6px;">Complete enrollment</a>' +
+            '<a href="' + url + '" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;letter-spacing:0.04em;color:#FBFFF1;text-decoration:none;border-radius:6px;">Finish your membership</a>' +
           '</td></tr>' +
         '</table>' +
         '<p style="margin:0 0 16px 0;color:#555;font-size:13px;">Or paste this link into your browser:<br><a href="' + url + '" style="color:#084734;word-break:break-all;">' + url + '</a></p>' +
-        '<p style="margin:0 0 24px 0;">Just reply here and I\'ll get back to you same day.</p>' +
-        '<p style="margin:0;">Talk soon,<br>' +
+        '<p style="margin:0 0 16px 0;">Heads up: the link is active for 24 hours. If it expires, reply, and I\'ll send you a fresh one.</p>' +
+        '<p style="margin:0 0 24px 0;">Any questions, reach out anytime. Excited to have you in the movement.</p>' +
+        '<p style="margin:0;">Best,<br>' +
           '<strong>Dillon Rosenthal</strong><br>' +
           'Founder, BounceBack Pickle<br>' +
-          '<a href="tel:+19418067933" style="color:#084734;text-decoration:none;">941-806-7933</a>' +
+          '<a href="https://www.bouncebackpickle.com" style="color:#084734;text-decoration:none;">www.bouncebackpickle.com</a>' +
         '</p>' +
       '</div>';
 
+    const RESEND_API_KEY = PropertiesService.getScriptProperties().getProperty('RESEND_API_KEY');
+    if (!RESEND_API_KEY) {
+      console.error('[BounceBack] RESEND_API_KEY not set in Script Properties — cannot send reminders.');
+      return;
+    }
+
     try {
-      // GmailApp lets us set `from` to a configured send-as alias so the
-      // recipient sees bouncebackpickle@gmail.com — not the script owner.
-      GmailApp.sendEmail(email, subject, body, {
-        from:     REMINDER_FROM_EMAIL,
-        name:     REMINDER_FROM_NAME,
-        replyTo:  REMINDER_FROM_EMAIL,
-        htmlBody: htmlBody,
+      const response = UrlFetchApp.fetch(RESEND_API_URL, {
+        method: 'post',
+        contentType: 'application/json',
+        headers: { Authorization: 'Bearer ' + RESEND_API_KEY },
+        payload: JSON.stringify({
+          from:     REMINDER_FROM,
+          to:       [email],
+          reply_to: REMINDER_REPLY_TO,
+          subject:  subject,
+          text:     body,
+          html:     htmlBody,
+        }),
+        muteHttpExceptions: true,
       });
-      withRetry(
-        () => sheet.getRange(i + 1, COL.paymentReminderSent).setValue(new Date()),
-        'sendPaymentReminders:setReminderSent'
-      );
-      console.log('[BounceBack] Reminder sent to', email, 'row', i + 1);
+
+      const code = response.getResponseCode();
+      const respBody = response.getContentText();
+
+      if (code >= 200 && code < 300) {
+        withRetry(
+          () => sheet.getRange(i + 1, COL.paymentReminderSent).setValue(new Date()),
+          'sendPaymentReminders:setReminderSent'
+        );
+        console.log('[BounceBack] Reminder sent to', email, 'row', i + 1);
+      } else {
+        // Don't mark AA — the row stays eligible and retries next run.
+        console.error('[BounceBack] Resend rejected row', i + 1, '—', code + ':', respBody);
+      }
     } catch (err) {
       console.error('[BounceBack] Reminder failed row', i + 1, ':', err.message);
     }

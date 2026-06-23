@@ -78,8 +78,8 @@ function PackCard({ p }: { p: PackOption }) {
       {isSub && (
         <p className="mt-3 rounded-lg bg-white/40 p-3 text-[11px] leading-relaxed text-bb-deep/70">
           Billed monthly starting today. Any deliveries that bill before our
-          July 31, 2026 ship date arrive together in your first box — e.g.
-          subscribe June 1 and your June + July shipments come at once.
+          August 31, 2026 ship date arrive together in your first box — e.g.
+          subscribe June 1 and your June, July + August shipments come at once.
         </p>
       )}
 
@@ -136,7 +136,7 @@ export default function PreorderPacksSection({
       {/* Preorder banner — visible above the pack grid */}
       <div className="glass-card mx-auto mb-8 max-w-3xl rounded-2xl px-6 py-5 text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.15em] text-bb-deep">
-          Preorder · First shipment July 31, 2026
+          Preorder · First shipment August 31, 2026
         </p>
         <p className="mt-2 text-sm text-bb-deep/70">
           We&rsquo;re still in production. Dates may shift — we&rsquo;ll email
