@@ -14,15 +14,39 @@ function PackCard({ p }: { p: PackOption }) {
 
   return (
     <div className="glass-card flex flex-col rounded-2xl p-6 transition-shadow hover:shadow-lg">
-      {/* Pack image — layered balls (3 / 12 / 36 / 100) */}
-      <div className="mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-white/35">
+      {/* Pack image — layered balls (3 / 12 / 36 / 100).
+          Brand + recycling marks overlay the product itself so the
+          trademark shows a direct association with the ball being
+          purchased at point of sale (USPTO specimen requirement). */}
+      <div className="relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-white/35">
         <Image
           src={p.image}
-          alt={`BB-1 ${p.label}`}
+          alt={`BounceBack BB-1 recycled pickleball — ${p.label}`}
           width={400}
           height={400}
           className="h-full w-full object-contain p-3"
         />
+
+        {/* Trademark + recycling specimen mark, on the goods */}
+        <div className="absolute inset-x-2 bottom-2 flex items-center justify-center gap-2 rounded-full bg-bb-deep/90 px-3 py-1.5 backdrop-blur-sm">
+          <Image
+            src="/bbbblogo.png"
+            alt="BounceBack Pickle"
+            width={20}
+            height={20}
+            className="h-4 w-4 object-contain"
+          />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-bb-cream">
+            BounceBack BB-1
+          </span>
+          <Image
+            src="/recyclinglogo.png"
+            alt="Recycled pickleball"
+            width={16}
+            height={16}
+            className="h-3.5 w-3.5 object-contain"
+          />
+        </div>
       </div>
 
       <div className="flex items-baseline justify-between">
