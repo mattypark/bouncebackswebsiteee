@@ -241,6 +241,19 @@ export default function HeroSection() {
           World
         </h1>
 
+        {/* Brand mark — direct association with recycling services (Class 40) */}
+        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-bb-cream/95 px-3 py-1.5 shadow-sm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bbbblogo.png"
+            alt="BounceBack Pickle recycling services"
+            className="h-5 w-5 object-contain"
+          />
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-bb-deep">
+            BounceBack Recycling
+          </span>
+        </div>
+
         <p className="mt-3 text-xs leading-relaxed text-white/90" style={{ maxWidth: "min(340px, 70vw)" }}>
           Pickleball&apos;s first closed-loop recycling bin. Drop your
           cracked balls in — we collect, grind, and remold them into
@@ -298,8 +311,22 @@ export default function HeroSection() {
           World
         </h1>
 
-        {/* Body text */}
-        <p className="animate-fade-in-up-delayed-2 mt-6 max-w-[420px] text-sm leading-relaxed text-white/90 lg:text-base">
+        {/* Brand mark — shown in direct association with the recycling
+            services copy below (USPTO Class 40 specimen requirement). */}
+        <div className="animate-fade-in-up-delayed-2 mt-6 inline-flex items-center gap-2.5 rounded-full bg-bb-cream/95 px-3.5 py-2 shadow-sm">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/bbbblogo.png"
+            alt="BounceBack Pickle recycling services"
+            className="h-7 w-7 object-contain"
+          />
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-bb-deep">
+            BounceBack Recycling
+          </span>
+        </div>
+
+        {/* Body text — recycling services offered */}
+        <p className="animate-fade-in-up-delayed-2 mt-4 max-w-[420px] text-sm leading-relaxed text-white/90 lg:text-base">
           Pickleball&apos;s first closed-loop recycling bin.
           <br />
           We&apos;re turning the fastest growing sport into the first sustainable sport.

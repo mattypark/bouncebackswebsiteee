@@ -103,6 +103,7 @@ const LOCATION_DATA: StateData[] = [
       { name: "Palm Aire Country Club", city: "Sarasota", nonprofit: false, coords: [-82.46, 27.40] },
       { name: "Pelican Landing", city: "Bonita Springs", nonprofit: false, coords: [-81.79, 26.38] },
       { name: "Spanish Wells Golf & Country Club", city: "Bonita Springs", nonprofit: false, coords: [-81.78, 26.34] },
+      { name: "Bradenton Yacht Club", city: "Palmetto", nonprofit: false, coords: [-82.58, 27.52] },
     ],
   },
   {

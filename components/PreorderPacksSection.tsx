@@ -15,36 +15,40 @@ function PackCard({ p }: { p: PackOption }) {
   return (
     <div className="glass-card flex flex-col rounded-2xl p-6 transition-shadow hover:shadow-lg">
       {/* Pack image — layered balls (3 / 12 / 36 / 100).
-          Brand + recycling marks overlay the product itself so the
+          Brand + recycling marks sit on the product itself so the
           trademark shows a direct association with the ball being
           purchased at point of sale (USPTO specimen requirement). */}
-      <div className="relative mb-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-white/35">
+      <div className="relative mb-5 flex aspect-[4/5] items-center justify-center overflow-hidden rounded-xl bg-white/35">
+        {/* Balls pinned to the top so the bottom stays an empty zone
+            for the specimen mark — no overlap with the product. */}
         <Image
           src={p.image}
           alt={`BounceBack BB-1 recycled pickleball — ${p.label}`}
-          width={400}
-          height={400}
-          className="h-full w-full object-contain p-3"
+          width={500}
+          height={500}
+          className="h-full w-full object-contain object-top p-2 pb-24"
         />
 
-        {/* Trademark + recycling specimen mark, on the goods */}
-        <div className="absolute inset-x-2 bottom-2 flex items-center justify-center gap-2 rounded-full bg-bb-deep/90 px-3 py-1.5 backdrop-blur-sm">
+        {/* Trademark + recycling specimen mark — sits in the empty
+            space below the balls. Light pill so both the BounceBack
+            mark and the recycling symbol stay legible. */}
+        <div className="absolute inset-x-2 bottom-3 flex items-center justify-between gap-2 rounded-full bg-bb-cream/95 px-4 py-2 shadow-sm ring-1 ring-bb-deep/10">
           <Image
             src="/bbbblogo.png"
             alt="BounceBack Pickle"
-            width={20}
-            height={20}
-            className="h-4 w-4 object-contain"
+            width={32}
+            height={32}
+            className="h-7 w-7 shrink-0 object-contain"
           />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-bb-cream">
+          <span className="text-[9px] font-bold uppercase leading-tight tracking-[0.06em] text-bb-deep">
             BounceBack BB-1
           </span>
           <Image
             src="/recyclinglogo.png"
             alt="Recycled pickleball"
-            width={16}
-            height={16}
-            className="h-3.5 w-3.5 object-contain"
+            width={18}
+            height={18}
+            className="h-4 w-4 shrink-0 object-contain"
           />
         </div>
       </div>
@@ -169,7 +173,7 @@ export default function PreorderPacksSection({
       </div>
 
       {/* Pack cards — each has its own One-time / Subscribe toggle */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-4 lg:gap-8">
         {PACKS.map((p) => (
           <PackCard key={p.pack} p={p} />
         ))}
