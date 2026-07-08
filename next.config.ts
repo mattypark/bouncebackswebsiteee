@@ -14,8 +14,7 @@ const nextConfig: NextConfig = {
       { source: "/the-team", destination: "/about", permanent: true },
       { source: "/shipping-policy", destination: "/", permanent: true },
       { source: "/terms-conditions", destination: "/", permanent: true },
-      { source: "/retro-pickle-t-shirt", destination: "/bb-1", permanent: true },
-      { source: "/shop", destination: "/bb-1", permanent: true },
+      { source: "/retro-pickle-t-shirt", destination: "/shop", permanent: true },
     ];
   },
 };

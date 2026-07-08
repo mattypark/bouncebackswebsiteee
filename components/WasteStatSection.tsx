@@ -65,7 +65,7 @@ export default function WasteStatSection() {
   const [hasStarted, setHasStarted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  const TARGET = 770000;
+  const TARGET = 2200000;
   const parts = useMemo(() => getDigitParts(TARGET), []);
 
   useEffect(() => {

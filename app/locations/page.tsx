@@ -264,6 +264,7 @@ const LOCATION_DATA: StateData[] = [
     zoomLevel: 4,
     locations: [
       { name: "Quad City Tennis Club", city: "Moline", nonprofit: false, coords: [-90.48, 41.49] },
+      { name: "Brick House Pickleball", city: "Lake Forest", nonprofit: false, coords: [-87.84, 42.26] },
     ],
   },
 ];

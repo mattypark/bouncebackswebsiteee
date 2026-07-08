@@ -1,0 +1,292 @@
+{
+  "app/about/page.tsx": {
+    "mtime": 1774380251.4360824,
+    "ast_hash": "e05bed8f2d116ea5e91d7e85dd1e74d3",
+    "semantic_hash": ""
+  },
+  "app/account/page.tsx": {
+    "mtime": 1774380261.9203408,
+    "ast_hash": "cbdfb317e8b4490589f8925fc2aeb039",
+    "semantic_hash": ""
+  },
+  "app/api/auth/callback/route.ts": {
+    "mtime": 1772468887.262824,
+    "ast_hash": "eee59513465d1bbc8aafc7d2f7571c18",
+    "semantic_hash": ""
+  },
+  "app/api/auth/login/route.ts": {
+    "mtime": 1772468874.1560228,
+    "ast_hash": "cb919327fc1578e98f5f50ac14e372db",
+    "semantic_hash": ""
+  },
+  "app/api/auth/logout/route.ts": {
+    "mtime": 1772466545.2988806,
+    "ast_hash": "7fb06cb5a67cc93bbb6650ea34077875",
+    "semantic_hash": ""
+  },
+  "app/api/auth/register/route.ts": {
+    "mtime": 1772468868.134034,
+    "ast_hash": "4c220736c8b5a12f8a905577cad35923",
+    "semantic_hash": ""
+  },
+  "app/api/contact/route.ts": {
+    "mtime": 1778851869.3373265,
+    "ast_hash": "b5988b8f9122d2978eda907e59ec166c",
+    "semantic_hash": ""
+  },
+  "app/api/sheet-webhook/route.ts": {
+    "mtime": 1778851865.5246124,
+    "ast_hash": "51f35e319ac44c4bcb9e3922f32f6040",
+    "semantic_hash": ""
+  },
+  "app/api/stripe-checkout/route.ts": {
+    "mtime": 1778861680.005266,
+    "ast_hash": "f4f0341dc79719826b78f451b936ac68",
+    "semantic_hash": ""
+  },
+  "app/api/stripe-verify/route.ts": {
+    "mtime": 1778863621.5027928,
+    "ast_hash": "c5ae7a9eefc98c5279f28884b69714b8",
+    "semantic_hash": ""
+  },
+  "app/api/waitlist/route.ts": {
+    "mtime": 1780590229.7162726,
+    "ast_hash": "5033bd055fe761a7c835ade0d9a3c70d",
+    "semantic_hash": ""
+  },
+  "app/bb-1/page.tsx": {
+    "mtime": 1781296456.501201,
+    "ast_hash": "e0759b3485948dbac1e42c97524fa4d6",
+    "semantic_hash": ""
+  },
+  "app/layout.tsx": {
+    "mtime": 1781297759.3333492,
+    "ast_hash": "b93fcf02efd27e1bfe6feaae9b2fea57",
+    "semantic_hash": ""
+  },
+  "app/locations/page.tsx": {
+    "mtime": 1782425739.05371,
+    "ast_hash": "39203b1c749069c4521a691055ea88fa",
+    "semantic_hash": ""
+  },
+  "app/page.tsx": {
+    "mtime": 1783165500.309997,
+    "ast_hash": "e7d769d510d177306e78808a66dfaf0f",
+    "semantic_hash": ""
+  },
+  "app/request-bin/page.tsx": {
+    "mtime": 1781027794.9149187,
+    "ast_hash": "c6e02d03b9d405c144a7a895a69a8f94",
+    "semantic_hash": ""
+  },
+  "app/robots.ts": {
+    "mtime": 1773876048.638541,
+    "ast_hash": "a180c14a3b20b720c63d65e0c7f91151",
+    "semantic_hash": ""
+  },
+  "app/shop/page.tsx": {
+    "mtime": 1783155478.1193068,
+    "ast_hash": "7ca651f360c3e13204081b841d879fa0",
+    "semantic_hash": ""
+  },
+  "app/sitemap.ts": {
+    "mtime": 1773876045.0389054,
+    "ast_hash": "f5c040af3dfb8c997c93cec54b681bce",
+    "semantic_hash": ""
+  },
+  "app/template.tsx": {
+    "mtime": 1771787893.0602524,
+    "ast_hash": "378380955bf5c29bde13de4b8643bcdf",
+    "semantic_hash": ""
+  },
+  "components/CartContext.tsx": {
+    "mtime": 1780250427.2014863,
+    "ast_hash": "53bea363306f69cd753a23c10c2e009f",
+    "semantic_hash": ""
+  },
+  "components/CartDrawer.tsx": {
+    "mtime": 1780250570.192235,
+    "ast_hash": "734172f850f15426f57485e8b6f9a817",
+    "semantic_hash": ""
+  },
+  "components/CartIcon.tsx": {
+    "mtime": 1771523749.7838788,
+    "ast_hash": "552ed935c4d75d4d12cf2ff3d967a88f",
+    "semantic_hash": ""
+  },
+  "components/FounderSection.tsx": {
+    "mtime": 1770913637.5329437,
+    "ast_hash": "01790f40178da38f6498cc54f7ecaabb",
+    "semantic_hash": ""
+  },
+  "components/HeroSection.tsx": {
+    "mtime": 1783155925.3071823,
+    "ast_hash": "b074e56d2f435c43a699166abc1b5795",
+    "semantic_hash": ""
+  },
+  "components/MerchSection.tsx": {
+    "mtime": 1783165562.5004997,
+    "ast_hash": "b6224361e144abe245cdc748e34147e8",
+    "semantic_hash": ""
+  },
+  "components/NavBar.tsx": {
+    "mtime": 1783165517.7009404,
+    "ast_hash": "3621c23ff79f8daef78ca21f0b7d1b7f",
+    "semantic_hash": ""
+  },
+  "components/PreorderPacksSection.tsx": {
+    "mtime": 1782346968.4544842,
+    "ast_hash": "79381d59e49aea2dfff348c0f6a1034b",
+    "semantic_hash": ""
+  },
+  "components/Providers.tsx": {
+    "mtime": 1771788762.407822,
+    "ast_hash": "9848eebf4914d626331c846afe11283d",
+    "semantic_hash": ""
+  },
+  "components/RecycledRevealSection.tsx": {
+    "mtime": 1781296877.167239,
+    "ast_hash": "eda156f035744228cc5591c2b0c1e1a2",
+    "semantic_hash": ""
+  },
+  "components/SmoothScroll.tsx": {
+    "mtime": 1781297773.983523,
+    "ast_hash": "75921c8365f9e5822202136eda35a733",
+    "semantic_hash": ""
+  },
+  "components/TestimonialsSection.tsx": {
+    "mtime": 1771267183.499813,
+    "ast_hash": "084abcc85bc61ca011549b924d4cbac4",
+    "semantic_hash": ""
+  },
+  "components/TextRevealSection.tsx": {
+    "mtime": 1781296865.0854099,
+    "ast_hash": "41f8f7d7642f4737c185fa3456c776e3",
+    "semantic_hash": ""
+  },
+  "components/TheProcessSection.tsx": {
+    "mtime": 1781296896.1297224,
+    "ast_hash": "3dff3171421df837c95f5930f26b0f78",
+    "semantic_hash": ""
+  },
+  "components/WaitlistSection.tsx": {
+    "mtime": 1781297368.2424393,
+    "ast_hash": "38bae179fdce9064116d63657484fb94",
+    "semantic_hash": ""
+  },
+  "components/WasteStatSection.tsx": {
+    "mtime": 1781296875.2681506,
+    "ast_hash": "f8cf7b64e4311b4abfb2d13452c636b7",
+    "semantic_hash": ""
+  },
+  "components/WhyChooseSection.tsx": {
+    "mtime": 1778683400.1399977,
+    "ast_hash": "a70f6dc0c13545a34bd96398a1c3391a",
+    "semantic_hash": ""
+  },
+  "eslint.config.mjs": {
+    "mtime": 1770732349.989986,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": ""
+  },
+  "hooks/useTransitionRouter.ts": {
+    "mtime": 1771445978.2419488,
+    "ast_hash": "a1225905d1c5414bfc6814f8ea582009",
+    "semantic_hash": ""
+  },
+  "lib/shopify-merch.ts": {
+    "mtime": 1783165531.2585783,
+    "ast_hash": "5bc780f63af7b0d9c6bff024816e4066",
+    "semantic_hash": ""
+  },
+  "lib/shopify-products.ts": {
+    "mtime": 1780589125.1753697,
+    "ast_hash": "de9f28a1a0781f425a27bb35dd578453",
+    "semantic_hash": ""
+  },
+  "lib/supabase.ts": {
+    "mtime": 1772466525.6810598,
+    "ast_hash": "6cfde684efe99df3a315fc6cef6e4170",
+    "semantic_hash": ""
+  },
+  "lib/video-urls.ts": {
+    "mtime": 1779040960.4476397,
+    "ast_hash": "958bd74be2a6f31a34b49aa3e834e5fb",
+    "semantic_hash": ""
+  },
+  "next.config.ts": {
+    "mtime": 1783165618.3194296,
+    "ast_hash": "72f3d9194ad380c9136e671b4985cc10",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1778688898.9675364,
+    "ast_hash": "87850ad43b4e10826cc47f0a32c797a2",
+    "semantic_hash": ""
+  },
+  "postcss.config.mjs": {
+    "mtime": 1770732354.7832816,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1770732354.7840729,
+    "ast_hash": "02fc19ad21338c2ab820a70136310db4",
+    "semantic_hash": ""
+  },
+  "types/react-simple-maps.d.ts": {
+    "mtime": 1774897782.708395,
+    "ast_hash": "db893fc99ff0f429c4f1da09e7177ba9",
+    "semantic_hash": ""
+  },
+  "APPS_SCRIPT_FIX_GMAIL.md": {
+    "mtime": 1781014455.8628278,
+    "ast_hash": "7c1261c143e1cb016620bff89283ba35",
+    "semantic_hash": ""
+  },
+  "APPS_SCRIPT_FULL.md": {
+    "mtime": 1781991519.8102803,
+    "ast_hash": "d60c71e17d6eb26a2c00c67e54e31b03",
+    "semantic_hash": ""
+  },
+  "APPS_SCRIPT_WEBHOOK.md": {
+    "mtime": 1779456579.7446635,
+    "ast_hash": "e132c66ab34d2da1ec5fa48be135cfba",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1773262399.0128608,
+    "ast_hash": "4e124aa7052655165e04643f173c3d42",
+    "semantic_hash": ""
+  },
+  "context-bounceback-preorder-launch/README.md": {
+    "mtime": 1780768077.5731058,
+    "ast_hash": "a41ee855c8820402b9b3bd0ea32b5cab",
+    "semantic_hash": ""
+  },
+  "public/file.svg": {
+    "mtime": 1770732354.783485,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "public/globe.svg": {
+    "mtime": 1770732354.783834,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "public/next.svg": {
+    "mtime": 1770732354.7837148,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "public/vercel.svg": {
+    "mtime": 1770732354.7836022,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "public/window.svg": {
+    "mtime": 1770732354.783945,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  }
+}
