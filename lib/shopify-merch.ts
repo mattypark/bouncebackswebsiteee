@@ -38,15 +38,15 @@ export const MERCH: MerchProduct[] = [
   {
     slug: "bb-tee",
     name: "BounceBack Tee",
-    price: 28.0,
-    image: "/merch/bb-tee.png",
-    description: "Soft cotton tee with the BounceBack mark.",
+    price: 29.99,
+    image: "/merch/bb-tee.jpg",
+    description:
+      "Garment-dyed Comfort Colors pocket tee in ivory, with the BounceBack Athletic Co. mark.",
     sizes: [
-      { size: "S", variantId: "" },
-      { size: "M", variantId: "" },
-      { size: "L", variantId: "" },
-      { size: "XL", variantId: "" },
+      { size: "M", variantId: "50145969078511" },
+      { size: "L", variantId: "50145969111279" },
+      { size: "XL", variantId: "50149599674607" },
     ],
-    shippingNote: "Ships in 5–7 days",
+    shippingNote: "+ $4.99 shipping",
   },
 ];
