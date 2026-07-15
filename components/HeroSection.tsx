@@ -6,11 +6,11 @@ import CartIcon from "./CartIcon";
 
 const menuLinks = [
   { name: "Home", href: "/" },
-  { name: "About", href: "/about" },
+  { name: "Buy Balls", href: "/bb-1" },
   { name: "Order a Bin", href: "/request-bin" },
   { name: "Bin Locations", href: "/locations" },
-  { name: "BB-1 Ball", href: "/bb-1" },
-  { name: "Shop", href: "/shop" },
+  { name: "Shop All", href: "/shop" },
+  { name: "About", href: "/about" },
   { name: "Account", href: "/account" },
 ];
 

@@ -7,7 +7,6 @@ import WhyChooseSection from "@/components/WhyChooseSection";
 
 import WaitlistSection from "@/components/WaitlistSection";
 import PreorderPacksSection from "@/components/PreorderPacksSection";
-import MerchSection from "@/components/MerchSection";
 
 export default function Home() {
   return (
@@ -18,15 +17,6 @@ export default function Home() {
         {/* BB-1 preorder packs — also on /bb-1 */}
         <div className="w-full pt-16 md:pt-20">
           <PreorderPacksSection id="preorder-home" heading="Preorder the BB-1." />
-        </div>
-        {/* Merch feature — links through to the full /shop page */}
-        <div className="w-full pt-16 md:pt-20">
-          <MerchSection
-            id="merch-home"
-            heading="Wear the movement."
-            viewAllHref="/shop"
-            limit={3}
-          />
         </div>
         {/* Storytelling slides */}
         <TextRevealSection

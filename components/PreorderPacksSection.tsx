@@ -133,6 +133,67 @@ function PackCard({ p }: { p: PackOption }) {
   );
 }
 
+/* Mobile / tablet carousel — one pack at a time with arrow + dot controls.
+   Mirrors the lime arrow buttons + dot indicators used on the /bb-1 video
+   carousel so the two feel like one system. Desktop keeps the 4-up grid. */
+function PacksCarousel() {
+  const [active, setActive] = useState(0);
+  const prev = () => setActive((i) => (i === 0 ? PACKS.length - 1 : i - 1));
+  const next = () => setActive((i) => (i === PACKS.length - 1 ? 0 : i + 1));
+
+  return (
+    <div className="lg:hidden">
+      <div className="flex items-stretch justify-center gap-3">
+        {/* Left arrow */}
+        <button
+          type="button"
+          onClick={prev}
+          aria-label="Previous pack"
+          className="flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-full bg-bb-lime text-bb-deep transition-colors hover:bg-bb-mid md:h-12 md:w-12"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+
+        {/* Active pack card */}
+        <div className="w-full min-w-0 max-w-sm">
+          <PackCard p={PACKS[active]} />
+        </div>
+
+        {/* Right arrow */}
+        <button
+          type="button"
+          onClick={next}
+          aria-label="Next pack"
+          className="flex h-10 w-10 shrink-0 items-center justify-center self-center rounded-full bg-bb-lime text-bb-deep transition-colors hover:bg-bb-mid md:h-12 md:w-12"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="mt-8 flex items-center justify-center gap-2.5">
+        {PACKS.map((p, i) => (
+          <button
+            key={p.pack}
+            type="button"
+            onClick={() => setActive(i)}
+            aria-label={`Go to ${p.label}`}
+            className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+              i === active
+                ? "bg-bb-deep scale-110"
+                : "bg-bb-deep/20 hover:bg-bb-deep/40"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function PreorderPacksSection({
   id = "preorder",
   heading,
@@ -172,12 +233,14 @@ export default function PreorderPacksSection({
         </p>
       </div>
 
-      {/* Pack cards — each has its own One-time / Subscribe toggle */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:grid-cols-4 lg:gap-8">
+      {/* Pack cards — each has its own One-time / Subscribe toggle.
+          Mobile/tablet: one-card carousel. Desktop: 4-up grid. */}
+      <div className="hidden lg:grid lg:grid-cols-4 lg:gap-8">
         {PACKS.map((p) => (
           <PackCard key={p.pack} p={p} />
         ))}
       </div>
+      <PacksCarousel />
 
       <p className="mt-8 text-center text-xs text-bb-deep/40">
         Secure checkout via Shopify. You&rsquo;ll receive an email confirmation

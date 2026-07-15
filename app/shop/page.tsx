@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
+import PreorderPacksSection from "@/components/PreorderPacksSection";
 import MerchSection from "@/components/MerchSection";
 
 export const metadata: Metadata = {
-  title: "Shop — BounceBack",
+  title: "Shop All — BounceBack",
   description:
-    "BounceBack apparel and merch. Wear the movement — recycled pickleball, built for players, designed for the planet.",
+    "Shop all BounceBack — BB-1 recycled pickleball packs and apparel. Built for players, designed for the planet.",
 };
 
 export default function ShopPage() {
@@ -19,7 +20,8 @@ export default function ShopPage() {
             BounceBack Shop
           </p>
         </div>
-        <MerchSection id="shop" heading="Wear the movement." />
+        <PreorderPacksSection id="shop-packs" heading="Preorder the BB-1." />
+        <MerchSection id="shop-merch" heading="Wear the movement." />
       </main>
     </div>
   );
