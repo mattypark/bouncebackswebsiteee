@@ -7,19 +7,19 @@ const STEPS = [
   {
     number: "1",
     title: "Collect",
-    body: "Cracked pickleballs are collected in BounceBack bins and shipped out for reprocessing before they ever reach a landfill.",
+    body: "Cracked pickleballs are collected in BounceBack recycling bins by sustainable facility members across the country and shipped back to us for reprocessing before they ever reach a landfill.",
     video: VIDEOS.process1,
   },
   {
     number: "2",
     title: "Grind",
-    body: "Collected balls are broken down into raw material.",
+    body: "Collected balls go through our multi-step process to be broken down into clean, raw, ready-to-go material for manufacturing.",
     video: VIDEOS.process2,
   },
   {
     number: "3",
     title: "Remold",
-    body: "That material is remolded into new pickleballs, retaining the same feel & same bounce.",
+    body: "Our material is then remolded into brand-new pickleballs, retaining the same feel & same bounce as professional-grade balls.",
     video: VIDEOS.process3,
   },
 ];
