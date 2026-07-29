@@ -105,6 +105,7 @@ const LOCATION_DATA: StateData[] = [
       { name: "Spanish Wells Golf & Country Club", city: "Bonita Springs", nonprofit: false, coords: [-81.78, 26.34] },
       { name: "Renaissance Center Club at Palmira", city: "Bonita Springs", nonprofit: false, coords: [-81.76, 26.36] },
       { name: "Bradenton Yacht Club", city: "Palmetto", nonprofit: false, coords: [-82.58, 27.52] },
+      { name: "Steep Dreams", city: "West Palm Beach", nonprofit: false, coords: [-80.06, 26.77] },
     ],
   },
   {

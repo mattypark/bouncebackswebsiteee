@@ -22,26 +22,26 @@ export default function CartDrawer() {
 
   function handleCheckout() {
     if (items.length === 0) return;
-    // Shopify multi-variant cart permalink:
-    //   https://{shop}/cart/{variantId}:{qty},{variantId}:{qty}
-    // For recurring lines we need ?selling_plan={id}. The single query param
-    // applies the same plan to every line in the cart, so we only attach it
-    // when every line is a subscription AND they all share the same plan.
-    // Mixed carts (one-time + subscription) fall back to plain permalink and
-    // the subscription line will be charged once instead of recurring — a
-    // limitation we accept since most customers buy a single pack.
-    const parts = items.map((i) => `${i.id}:${i.quantity}`).join(",");
-    const planIds = Array.from(
-      new Set(items.map((i) => i.sellingPlanId).filter(Boolean)),
-    );
-    const allSubsSamePlan =
-      items.length > 0 &&
-      items.every((i) => i.sellingPlanId) &&
-      planIds.length === 1;
-    let url = `https://${SHOP_DOMAIN}/cart/${parts}`;
-    if (allSubsSamePlan) {
-      url += `?selling_plan=${planIds[0]}`;
+    // Shopify's current checkout ignores ?selling_plan= on the old
+    // /cart/{variantId}:{qty} permalink format (the line silently becomes a
+    // one-time purchase). The /cart/add endpoint DOES honor selling_plan per
+    // call, so we chain adds via return_to:
+    //   /cart/clear → /cart/add (item 1) → /cart/add (item 2) → /checkout
+    // Each hop redirects to the next. This also supports mixed carts with
+    // per-line subscription plans, which the single query param never could.
+    let next = "/checkout";
+    for (const item of [...items].reverse()) {
+      const params = new URLSearchParams({
+        id: item.id,
+        quantity: String(item.quantity),
+      });
+      if (item.sellingPlanId) {
+        params.set("selling_plan", item.sellingPlanId);
+      }
+      params.set("return_to", next);
+      next = `/cart/add?${params.toString()}`;
     }
+    const url = `https://${SHOP_DOMAIN}/cart/clear?return_to=${encodeURIComponent(next)}`;
     setRedirecting(true);
     window.location.href = url;
   }
