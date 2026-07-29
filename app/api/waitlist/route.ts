@@ -5,6 +5,8 @@ const rateLimit = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_MAX = 5; // max attempts per window
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 
+const CLOSE_API_BASE = "https://api.close.com/api/v1";
+
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = rateLimit.get(ip);
@@ -18,6 +20,27 @@ function isRateLimited(ip: string): boolean {
   return entry.count > RATE_LIMIT_MAX;
 }
 
+function closeAuthHeader(apiKey: string): string {
+  // Close uses HTTP Basic auth: API key as username, empty password
+  return `Basic ${Buffer.from(`${apiKey}:`).toString("base64")}`;
+}
+
+async function findExistingLead(apiKey: string, email: string): Promise<boolean> {
+  const res = await fetch(
+    `${CLOSE_API_BASE}/lead/?query=${encodeURIComponent(`email_address:"${email}"`)}&_limit=1&_fields=id`,
+    { headers: { Authorization: closeAuthHeader(apiKey) } }
+  );
+
+  if (!res.ok) {
+    // Dedupe lookup failure shouldn't block signup — fall through to create
+    console.error("Close lead search failed:", res.status, await res.text());
+    return false;
+  }
+
+  const data = await res.json();
+  return Array.isArray(data.data) && data.data.length > 0;
+}
+
 export async function POST(req: Request) {
   // Rate limit by IP
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -28,11 +51,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // Kit (ConvertKit) config — server-side only, never exposed to browser
-  const apiKey = process.env.KIT_API_KEY;
-  const formId = process.env.KIT_FORM_ID;
-  if (!apiKey || !formId) {
-    console.error("Missing KIT_API_KEY or KIT_FORM_ID env var");
+  // Close CRM config — server-side only, never exposed to browser
+  const apiKey = process.env.CLOSE_API_KEY;
+  if (!apiKey) {
+    console.error("Missing CLOSE_API_KEY env var");
     return NextResponse.json(
       { error: "Server configuration error." },
       { status: 500 }
@@ -60,28 +82,40 @@ export async function POST(req: Request) {
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Add subscriber to the Kit form. Kit dedupes by email automatically,
-  // so re-submitting an existing email succeeds (no duplicate created).
   try {
-    const res = await fetch(`https://api.kit.com/v4/forms/${formId}/subscribers`, {
+    // Dedupe: if a lead already has this email, treat as success
+    const exists = await findExistingLead(apiKey, normalizedEmail);
+    if (exists) {
+      return NextResponse.json({ success: true });
+    }
+
+    const res = await fetch(`${CLOSE_API_BASE}/lead/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Kit-Api-Key": apiKey,
+        Authorization: closeAuthHeader(apiKey),
       },
-      body: JSON.stringify({ email_address: normalizedEmail }),
+      body: JSON.stringify({
+        name: normalizedEmail,
+        contacts: [
+          {
+            name: normalizedEmail,
+            emails: [{ email: normalizedEmail, type: "office" }],
+          },
+        ],
+      }),
     });
 
     if (!res.ok) {
       const detail = await res.text();
-      console.error("Kit subscribe error:", res.status, detail);
+      console.error("Close lead create error:", res.status, detail);
       return NextResponse.json(
         { error: "Something went wrong. Please try again." },
         { status: 500 }
       );
     }
   } catch (err) {
-    console.error("Kit subscribe request failed:", err);
+    console.error("Close lead create request failed:", err);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
       { status: 500 }

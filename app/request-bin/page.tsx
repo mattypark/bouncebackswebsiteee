@@ -58,6 +58,8 @@ const ADDITIONAL_BIN_OPTIONS: { label: string; addons: number }[] = [
   { label: "1 additional bin - $50", addons: 50 },
   { label: "2 additional bins - $100", addons: 100 },
   { label: "3 additional bins - $150", addons: 150 },
+  { label: "4 additional bins - $200", addons: 200 },
+  { label: "5 additional bins - $250", addons: 250 },
 ];
 
 const BASE_MEMBERSHIP_PRICE = 150;

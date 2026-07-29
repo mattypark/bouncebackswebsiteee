@@ -22,7 +22,7 @@ export const SHOP_DOMAIN = "fpebnm-dn.myshopify.com";
 
 // Shared selling plan ID for the "BB-1 Monthly Delivery" plan.
 // All subscription variants are attached to this plan.
-export const SUBSCRIPTION_SELLING_PLAN_ID = "4537975023";
+export const SUBSCRIPTION_SELLING_PLAN_ID = "8742371567";
 
 export type Pack = "3" | "12" | "36" | "100";
 export type PurchaseType = "onetime" | "subscription";
