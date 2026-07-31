@@ -268,6 +268,11 @@ const LOCATION_DATA: StateData[] = [
     locations: [
       { name: "Quad City Tennis Club", city: "Moline", nonprofit: false, coords: [-90.48, 41.49] },
       { name: "Brick House Pickleball", city: "Lake Forest", nonprofit: false, coords: [-87.84, 42.26] },
+      { name: "Pickled! Wheaton", city: "Wheaton", nonprofit: false, coords: [-88.11, 41.88] },
+      { name: "Pickled! Frankfort", city: "Frankfort", nonprofit: false, coords: [-87.85, 41.51] },
+      { name: "Pickled! Woodridge", city: "Woodridge", nonprofit: false, coords: [-88.00, 41.73] },
+      { name: "Pickled! Batavia", city: "Batavia", nonprofit: false, coords: [-88.34, 41.86] },
+      { name: "Pickled! GameChangers", city: "Channahon", nonprofit: false, coords: [-88.23, 41.43] },
     ],
   },
 ];
