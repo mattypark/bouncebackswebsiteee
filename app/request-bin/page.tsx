@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import NavBar from "@/components/NavBar";
+import SiteFooter from "@/components/SiteFooter";
 
 const balls = [
   {
@@ -496,19 +497,19 @@ export default function RequestBinPage() {
   const total = Math.round((recurringYearly + addons) * 100) / 100;
 
   const inputClass =
-    "w-full rounded-xl bg-bb-deep px-6 py-4 text-sm text-white outline-none placeholder:text-white/30 md:py-5 md:text-base";
+    "w-full rounded-xl bg-bb-ink px-6 py-4 text-sm text-white outline-none placeholder:text-white/30 md:py-5 md:text-base";
   const labelClass =
-    "absolute -top-3 left-4 z-10 bg-bb-cream px-1.5 text-xs font-medium text-bb-mid";
+    "absolute -top-3 left-4 z-10 bg-bb-paper px-1.5 text-xs font-medium text-bb-mid";
 
   return (
-    <div className="min-h-screen bg-bb-cream">
+    <div className="min-h-screen bg-bb-paper">
       <NavBar variant="dark" />
 
       <section className="relative w-full overflow-hidden pt-12 pb-40 md:pt-20 md:pb-56 lg:pt-28 lg:pb-80">
         {balls.map((b) => (
           <div
             key={b.id}
-            className={`pointer-events-none absolute rounded-full bg-bb-lime ${b.base}`}
+            className={`pointer-events-none absolute rounded-full bg-bb-volt/30 ${b.base}`}
             style={{
               animation: `${b.id} ${b.duration}s ease-in-out infinite`,
               willChange: "transform",
@@ -518,8 +519,8 @@ export default function RequestBinPage() {
 
         <div className="relative z-10 mx-auto max-w-3xl px-6">
           {completed ? (
-            <div className="mx-auto mt-14 max-w-[560px] rounded-2xl bg-bb-deep px-8 py-12 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-bb-lime">
+            <div className="mx-auto mt-14 max-w-[560px] rounded-2xl bg-bb-ink px-8 py-12 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-bb-volt">
                 <svg
                   width="24"
                   height="24"
@@ -533,7 +534,7 @@ export default function RequestBinPage() {
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white">You&apos;re in.</h2>
+              <h2 className="sport-display text-3xl text-white">You&apos;re in.</h2>
               <p className="mt-3 text-sm leading-relaxed text-white/60">
                 Your facility info is saved. We sent a confirmation to{" "}
                 <span className="font-semibold text-white">{formData.email}</span>. Our
@@ -544,15 +545,15 @@ export default function RequestBinPage() {
             <>
               {/* Progress */}
               <div className="mx-auto mb-8 max-w-[560px]">
-                <div className="flex items-center justify-between text-xs font-medium text-bb-deep/60">
+                <div className="flex items-center justify-between text-xs font-medium text-bb-ink/60">
                   <span>
                     Step {step + 1} of {TOTAL_STEPS}
                   </span>
                   <span>{Math.round(((step + 1) / TOTAL_STEPS) * 100)}%</span>
                 </div>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-bb-deep/10">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-bb-ink/10">
                   <div
-                    className="h-full rounded-full bg-bb-deep transition-all duration-500 ease-out"
+                    className="h-full rounded-full bg-bb-ink transition-all duration-500 ease-out"
                     style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
                   />
                 </div>
@@ -560,7 +561,7 @@ export default function RequestBinPage() {
                   <div
                     className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium ${
                       saveStatus === "saving"
-                        ? "bg-bb-deep/5 text-bb-deep/70"
+                        ? "bg-bb-ink/5 text-bb-ink/70"
                         : saveStatus === "saved"
                         ? "bg-bb-mid/10 text-bb-mid"
                         : "bg-red-50 text-red-600"
@@ -568,7 +569,7 @@ export default function RequestBinPage() {
                   >
                     {saveStatus === "saving" && (
                       <>
-                        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-bb-deep/30 border-t-bb-deep" />
+                        <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-bb-ink/30 border-t-bb-ink" />
                         <span>Saving your information…</span>
                       </>
                     )}
@@ -593,13 +594,13 @@ export default function RequestBinPage() {
                 {step === 0 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-bb-mid">
+                      <p className="sport-kicker text-bb-mid">
                         Step 1 of 5 — Welcome
                       </p>
-                      <h1 className="text-3xl font-bold tracking-tight text-black md:text-4xl lg:text-[44px] lg:leading-[1.1]">
+                      <h1 className="sport-display text-4xl text-bb-ink md:text-5xl lg:text-6xl">
                         Let&apos;s get your facility set up.
                       </h1>
-                      <p className="text-sm leading-relaxed text-black/55 md:text-base">
+                      <p className="text-sm leading-relaxed text-bb-ink/60 md:text-base">
                         Fill this out and we&apos;ll take care of the rest — bin shipped,
                         certificate sent, and your facility listed in the BounceBack network.
                       </p>
@@ -676,14 +677,14 @@ export default function RequestBinPage() {
                           key={b.title}
                           className="flex items-start gap-4 rounded-xl border border-black/5 bg-white px-4 py-3.5 md:px-5 md:py-4"
                         >
-                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bb-deep/5 text-bb-deep">
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-bb-ink/5 text-bb-ink">
                             {b.icon}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-black md:text-[15px]">
+                            <p className="text-sm font-bold text-bb-ink md:text-[15px]">
                               {b.title}
                             </p>
-                            <p className="mt-0.5 text-xs leading-relaxed text-black/50 md:text-sm">
+                            <p className="mt-0.5 text-xs leading-relaxed text-bb-ink/55 md:text-sm">
                               {b.body}
                             </p>
                           </div>
@@ -691,7 +692,7 @@ export default function RequestBinPage() {
                       ))}
                     </div>
 
-                    <div className="flex items-start gap-3 rounded-xl bg-bb-lime/15 px-4 py-3.5 text-sm text-bb-deep md:px-5">
+                    <div className="flex items-start gap-3 rounded-xl bg-bb-volt/20 px-4 py-3.5 text-sm text-bb-ink md:px-5">
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
@@ -712,7 +713,7 @@ export default function RequestBinPage() {
                       </span>
                     </div>
 
-                    <p className="text-center text-xs text-black/40 md:text-sm">
+                    <p className="text-center text-xs text-bb-ink/45 md:text-sm">
                       Takes just a few minutes to complete.
                     </p>
                   </div>
@@ -721,10 +722,10 @@ export default function RequestBinPage() {
                 {/* ─── Step 1: Contact Info ─── */}
                 {step === 1 && (
                   <>
-                    <h2 className="text-center text-2xl font-bold text-black md:text-3xl">
+                    <h2 className="sport-display text-center text-3xl text-bb-ink md:text-4xl">
                       Facility Contact Information
                     </h2>
-                    <p className="text-center text-sm text-black/50">
+                    <p className="text-center text-sm text-bb-ink/55">
                       Who&apos;s the main point of contact for your facility?
                     </p>
 
@@ -786,10 +787,10 @@ export default function RequestBinPage() {
                 {/* ─── Step 2: Facility Info ─── */}
                 {step === 2 && (
                   <>
-                    <h2 className="text-center text-2xl font-bold text-black md:text-3xl">
+                    <h2 className="sport-display text-center text-3xl text-bb-ink md:text-4xl">
                       Facility Information
                     </h2>
-                    <p className="text-center text-sm text-black/50">
+                    <p className="text-center text-sm text-bb-ink/55">
                       Where should we ship your BounceBack bin?
                     </p>
 
@@ -876,12 +877,12 @@ export default function RequestBinPage() {
                 {/* ─── Step 3: Program Overview + Add-ons + Agreements ─── */}
                 {step === 3 && (
                   <>
-                    <h2 className="text-center text-2xl font-bold text-black md:text-3xl">
+                    <h2 className="sport-display text-center text-3xl text-bb-ink md:text-4xl">
                       Program & Agreements
                     </h2>
 
-                    <div className="rounded-2xl border-2 border-bb-deep/10 bg-white p-5 text-sm leading-relaxed text-black/70 md:p-6">
-                      <p className="mb-3 text-base font-bold text-bb-deep">
+                    <div className="rounded-2xl border-2 border-bb-ink/10 bg-white p-5 text-sm leading-relaxed text-bb-ink/70 md:p-6">
+                      <p className="mb-3 text-base font-bold text-bb-ink">
                         The Sustainable Facility Accreditation Membership Includes:
                       </p>
                       <ul className="mt-2 space-y-2">
@@ -909,11 +910,11 @@ export default function RequestBinPage() {
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-4 font-semibold text-bb-deep">
+                      <p className="mt-4 font-semibold text-bb-ink">
                         Price: $150/year per facility
                       </p>
-                      <p className="mt-3 text-xs leading-relaxed text-black/55 md:text-sm">
-                        <span className="font-semibold text-bb-deep">Note:</span> Members
+                      <p className="mt-3 text-xs leading-relaxed text-bb-ink/60 md:text-sm">
+                        <span className="font-semibold text-bb-ink">Note:</span> Members
                         are responsible for shipping of collected balls (you will receive
                         a personalized BounceBack Shipping Portal for the most affordable
                         and convenient shipping rates).
@@ -937,22 +938,22 @@ export default function RequestBinPage() {
                       </span>
                     </div>
 
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-bb-deep/10 px-4 py-3.5 transition-colors hover:border-bb-deep/30 has-[:checked]:border-bb-lime has-[:checked]:bg-bb-lime/10">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-bb-ink/10 px-4 py-3.5 transition-colors hover:border-bb-ink/30 has-[:checked]:border-bb-volt has-[:checked]:bg-bb-volt/15">
                       <input
                         type="checkbox"
                         checked={formData.agreedTerms}
                         onChange={(e) => update("agreedTerms", e.target.checked)}
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-bb-deep"
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-bb-ink"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-bb-deep">
+                        <p className="text-sm font-semibold text-bb-ink">
                           I agree to the{" "}
                           <a
                             href="https://docs.google.com/document/d/1apV07AJb46iM0duGfUGw4-U-iMSSfUMg/edit"
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="text-bb-mid underline underline-offset-2 hover:text-bb-deep"
+                            className="text-bb-mid underline underline-offset-2 hover:text-bb-ink"
                           >
                             Membership Terms &amp; Conditions
                           </a>{" "}
@@ -960,24 +961,24 @@ export default function RequestBinPage() {
                             *
                           </span>
                         </p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-bb-deep/50">
+                        <p className="mt-0.5 text-xs leading-relaxed text-bb-ink/50">
                           Required to join the program.
                         </p>
                       </div>
                     </label>
 
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-bb-deep/10 px-4 py-3.5 transition-colors hover:border-bb-deep/30 has-[:checked]:border-bb-lime has-[:checked]:bg-bb-lime/10">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-bb-ink/10 px-4 py-3.5 transition-colors hover:border-bb-ink/30 has-[:checked]:border-bb-volt has-[:checked]:bg-bb-volt/15">
                       <input
                         type="checkbox"
                         checked={formData.agreedUpdates}
                         onChange={(e) => update("agreedUpdates", e.target.checked)}
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-bb-deep"
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-bb-ink"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-bb-deep">
+                        <p className="text-sm font-semibold text-bb-ink">
                           Keep me in the loop
                         </p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-bb-deep/50">
+                        <p className="mt-0.5 text-xs leading-relaxed text-bb-ink/50">
                           Updates, sustainability news, and program announcements.
                         </p>
                       </div>
@@ -988,12 +989,12 @@ export default function RequestBinPage() {
                 {/* ─── Step 4: Payment ─── */}
                 {step === 4 && (
                   <>
-                    <h2 className="text-center text-2xl font-bold text-black md:text-3xl">
+                    <h2 className="sport-display text-center text-3xl text-bb-ink md:text-4xl">
                       Payment
                     </h2>
 
                     {savedToBackend && (
-                      <div className="flex items-start gap-3 rounded-xl border-2 border-bb-lime bg-bb-lime/15 px-4 py-3.5 text-sm text-bb-deep">
+                      <div className="flex items-start gap-3 rounded-xl border-2 border-bb-volt bg-bb-volt/20 px-4 py-3.5 text-sm text-bb-ink">
                         <svg
                           width="18"
                           height="18"
@@ -1016,21 +1017,21 @@ export default function RequestBinPage() {
                     )}
 
                     {/* Order Summary */}
-                    <div className="rounded-2xl bg-white border-2 border-bb-deep/10 p-5 md:p-6">
-                      <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-bb-mid">
+                    <div className="rounded-2xl bg-white border-2 border-bb-ink/10 p-5 md:p-6">
+                      <p className="sport-kicker mb-4 text-bb-mid">
                         Order summary
                       </p>
-                      <div className="space-y-2.5 text-sm text-black/70 md:text-base">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-black/40">
+                      <div className="space-y-2.5 text-sm text-bb-ink/70 md:text-base">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-bb-ink/45">
                           Annual membership
                         </p>
                         <div className="flex items-baseline justify-between">
                           <span>Sustainable Facility Accreditation Membership</span>
-                          <span className="font-semibold text-bb-deep">
+                          <span className="font-semibold text-bb-ink">
                             ${BASE_MEMBERSHIP_PRICE}/yr
                           </span>
                         </div>
-                        <div className="flex items-baseline justify-between text-xs text-black/50">
+                        <div className="flex items-baseline justify-between text-xs text-bb-ink/55">
                           <span>Convenience fee (3.3%)</span>
                           <span>
                             +${membershipFee.toFixed(2)}/yr
@@ -1039,33 +1040,33 @@ export default function RequestBinPage() {
 
                         {addons > 0 && (
                           <>
-                            <div className="mt-3 border-t border-bb-deep/10 pt-3" />
-                            <p className="text-xs font-semibold uppercase tracking-wide text-black/40">
+                            <div className="mt-3 border-t border-bb-ink/10 pt-3" />
+                            <p className="text-xs font-semibold uppercase tracking-wide text-bb-ink/45">
                               One-time
                             </p>
                             <div className="flex items-baseline justify-between">
                               <span>{formData.additionalBins}</span>
-                              <span className="font-semibold text-bb-deep">
+                              <span className="font-semibold text-bb-ink">
                                 +${addons.toFixed(2)}
                               </span>
                             </div>
                           </>
                         )}
 
-                        <div className="mt-3 border-t border-bb-deep/10 pt-3" />
+                        <div className="mt-3 border-t border-bb-ink/10 pt-3" />
                         <div className="flex items-baseline justify-between text-base md:text-lg">
-                          <span className="font-bold text-bb-deep">Total today</span>
-                          <span className="font-bold text-bb-deep">
+                          <span className="font-bold text-bb-ink">Total today</span>
+                          <span className="font-bold text-bb-ink">
                             ${total.toFixed(2)}
                           </span>
                         </div>
-                        <div className="flex items-baseline justify-between text-sm text-black/55">
+                        <div className="flex items-baseline justify-between text-sm text-bb-ink/60">
                           <span>Renews each year</span>
                           <span className="font-semibold">
                             ${recurringYearly.toFixed(2)}/yr
                           </span>
                         </div>
-                        <p className="pt-1 text-xs leading-relaxed text-black/50">
+                        <p className="pt-1 text-xs leading-relaxed text-bb-ink/55">
                           Membership renews automatically each year — cancel anytime. Bins
                           are a one-time charge.
                         </p>
@@ -1073,7 +1074,7 @@ export default function RequestBinPage() {
                     </div>
 
                     {paymentStatus === "unavailable" ? (
-                      <div className="rounded-xl bg-bb-deep px-5 py-4 text-sm leading-relaxed text-white/90">
+                      <div className="rounded-xl bg-bb-ink px-5 py-4 text-sm leading-relaxed text-white/90">
                         Payment isn&apos;t available online yet — but{" "}
                         <span className="font-semibold text-white">your info is saved</span>
                         . Our team will reach out shortly with payment details. You can close
@@ -1093,7 +1094,7 @@ export default function RequestBinPage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className="rounded-xl border-2 border-bb-deep/20 px-6 py-4 text-sm font-semibold text-bb-deep transition-colors hover:border-bb-deep/40 md:py-5 md:text-base"
+                      className="border-2 border-bb-ink/20 px-6 py-4 text-sm font-black tracking-[0.16em] text-bb-ink uppercase transition-colors hover:border-bb-ink md:py-5"
                     >
                       ← Back
                     </button>
@@ -1105,7 +1106,7 @@ export default function RequestBinPage() {
                     <button
                       type="button"
                       onClick={goNext}
-                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 md:py-5 md:text-base"
+                      className="flex-1 bg-bb-ink px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-volt uppercase transition-colors hover:bg-bb-volt hover:text-bb-ink md:py-5"
                     >
                       Get Started →
                     </button>
@@ -1115,7 +1116,7 @@ export default function RequestBinPage() {
                     <button
                       type="button"
                       onClick={goNext}
-                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 md:py-5 md:text-base"
+                      className="flex-1 bg-bb-ink px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-volt uppercase transition-colors hover:bg-bb-volt hover:text-bb-ink md:py-5"
                     >
                       Next →
                     </button>
@@ -1126,7 +1127,7 @@ export default function RequestBinPage() {
                       type="button"
                       onClick={saveFacility}
                       disabled={loading}
-                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 disabled:cursor-not-allowed disabled:opacity-50 md:py-5 md:text-base"
+                      className="flex-1 bg-bb-ink px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-volt uppercase transition-colors hover:bg-bb-volt hover:text-bb-ink disabled:cursor-not-allowed disabled:opacity-50 md:py-5"
                     >
                       {loading ? "Saving..." : "Save & Next →"}
                     </button>
@@ -1137,7 +1138,7 @@ export default function RequestBinPage() {
                       type="button"
                       onClick={saveProgram}
                       disabled={loading}
-                      className="flex-1 rounded-xl bg-bb-deep px-10 py-4 text-sm font-semibold text-white transition-colors hover:bg-bb-deep/90 disabled:cursor-not-allowed disabled:opacity-50 md:py-5 md:text-base"
+                      className="flex-1 bg-bb-ink px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-volt uppercase transition-colors hover:bg-bb-volt hover:text-bb-ink disabled:cursor-not-allowed disabled:opacity-50 md:py-5"
                     >
                       {loading ? "Saving..." : "Save & Next →"}
                     </button>
@@ -1148,7 +1149,7 @@ export default function RequestBinPage() {
                       type="button"
                       onClick={startPayment}
                       disabled={paymentStatus === "redirecting"}
-                      className="flex-1 rounded-xl bg-bb-lime px-10 py-4 text-sm font-semibold text-bb-deep transition-colors hover:bg-bb-mint disabled:cursor-not-allowed disabled:opacity-50 md:py-5 md:text-base"
+                      className="flex-1 bg-bb-volt px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-ink uppercase transition-colors hover:bg-bb-ink hover:text-bb-volt disabled:cursor-not-allowed disabled:opacity-50 md:py-5"
                     >
                       {paymentStatus === "redirecting"
                         ? "Redirecting..."
@@ -1160,7 +1161,7 @@ export default function RequestBinPage() {
                     <button
                       type="button"
                       onClick={finishWithoutPayment}
-                      className="flex-1 rounded-xl bg-bb-lime px-10 py-4 text-sm font-semibold text-bb-deep transition-colors hover:bg-bb-mint md:py-5 md:text-base"
+                      className="flex-1 bg-bb-volt px-10 py-4 text-sm font-black tracking-[0.2em] text-bb-ink uppercase transition-colors hover:bg-bb-ink hover:text-bb-volt md:py-5"
                     >
                       Done
                     </button>
@@ -1172,16 +1173,7 @@ export default function RequestBinPage() {
         </div>
       </section>
 
-      <footer className="border-t border-black/10 px-10 py-8 md:px-12 lg:px-16">
-        <div className="flex items-end justify-between">
-          <p className="text-sm text-black/30">
-            recycled pickleballs. built for players. designed for the planet.
-          </p>
-          <p className="text-sm text-black/30">
-            &copy; {new Date().getFullYear()} BounceBack
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

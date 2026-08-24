@@ -307,7 +307,7 @@ export default function HeroSection() {
         </div>
 
         {/* Headline */}
-        <h1 className="sport-display animate-fade-in-up-delayed-1 mt-6 text-6xl text-white lg:text-7xl xl:text-8xl">
+        <h1 className="sport-display animate-fade-in-up-delayed-1 mt-6 max-w-[46vw] text-5xl text-white lg:text-6xl xl:text-7xl">
           <span className="text-bb-volt">Play Hard.</span>
           <br />
           Bounce Back.
