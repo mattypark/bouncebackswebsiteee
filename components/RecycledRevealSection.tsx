@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { VIDEOS } from "@/lib/video-urls";
 
 export default function RecycledRevealSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,7 +65,7 @@ export default function RecycledRevealSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full overflow-hidden py-24 md:py-32 lg:py-40"
+      className="relative w-full overflow-hidden bg-white py-24 md:py-32 lg:py-40"
     >
       {/* Headline — single line, word-by-word scroll reveal */}
       <div className="mx-auto mb-16 px-8 md:mb-20 md:px-14 lg:px-20">
@@ -95,7 +94,7 @@ export default function RecycledRevealSection() {
             <div className="relative overflow-hidden rounded-[26px] bg-black">
               <video
                 ref={videoRef}
-                src={VIDEOS.recycledReveal}
+                src="/recycled-reveal.mp4"
                 muted
                 playsInline
                 loop

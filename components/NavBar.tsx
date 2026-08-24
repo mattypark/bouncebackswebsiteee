@@ -2,16 +2,21 @@
 
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import CartIcon from "./CartIcon";
+import BrandLogo from "./BrandLogo";
 
 const menuLinks = [
   { name: "Home", href: "/" },
-  { name: "Buy Balls", href: "/bb-1" },
+  { name: "Shop", href: "/shop" },
+  { name: "About", href: "/about" },
   { name: "Order a Bin", href: "/request-bin" },
   { name: "Bin Locations", href: "/locations" },
-  { name: "Shop All", href: "/shop" },
-  { name: "About", href: "/about" },
   { name: "Account", href: "/account" },
+];
+
+const desktopLinks = [
+  { name: "Shop", href: "/shop" },
+  { name: "Our Story", href: "/about" },
+  { name: "Locations", href: "/locations" },
 ];
 
 /*
@@ -42,7 +47,7 @@ export default function NavBar({
   }, []);
 
   const logoColor = isMenuOpen ? "#fff" : variant === "light" ? "#fff" : "#084734";
-  const barColor = isMenuOpen ? "#CEF17B" : variant === "light" ? "#fff" : "#084734";
+  const barColor = isMenuOpen ? "#c6f000" : variant === "light" ? "#fff" : "#084734";
 
   return (
     <>
@@ -51,16 +56,34 @@ export default function NavBar({
       >
         <a
           href="/"
-          className="flex items-baseline text-xl transition-colors duration-300 md:text-2xl"
+          className="transition-colors duration-300"
           style={{ zIndex: 60, color: logoColor }}
         >
-          <span className="font-bold tracking-tight">Bounce</span>
-          <span className="font-light tracking-tight">Back</span>
+          <BrandLogo size="sm" />
         </a>
+
+        {/* Desktop inline links */}
+        <div className="hidden items-center gap-8 lg:flex">
+          {desktopLinks.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="sport-kicker transition-opacity duration-200 hover:opacity-60"
+              style={{ color: logoColor }}
+            >
+              {link.name}
+            </a>
+          ))}
+          <a
+            href="/shop"
+            className="bg-bb-ink px-6 py-3 text-xs font-black tracking-[0.2em] text-bb-volt uppercase transition-colors duration-200 hover:bg-bb-volt hover:text-bb-ink"
+          >
+            Shop Now
+          </a>
+        </div>
 
         {/* Cart + Hamburger */}
         <div className="flex items-center gap-5">
-          <CartIcon color={isMenuOpen ? "#CEF17B" : "#084734"} />
 
           {/* Hamburger / X button */}
           <button
@@ -108,7 +131,7 @@ export default function NavBar({
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-[55] flex flex-col bg-bb-deep"
+            className="fixed inset-0 z-[55] flex flex-col bg-bb-ink"
             initial={{ clipPath: `circle(0% at ${clipOrigin})` }}
             animate={{ clipPath: `circle(150% at ${clipOrigin})` }}
             exit={{ clipPath: `circle(0% at ${clipOrigin})` }}
@@ -149,8 +172,7 @@ export default function NavBar({
                     <a
                       href={link.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="group relative inline-flex items-center gap-3 overflow-visible py-2 text-4xl font-light text-bb-lime/90 transition-colors duration-300 hover:text-bb-lime md:text-5xl md:gap-4 lg:text-6xl lg:gap-5"
-                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                      className="sport-display group relative inline-flex items-center gap-3 overflow-visible py-2 text-4xl text-white/90 transition-colors duration-300 hover:text-bb-volt md:text-5xl md:gap-4 lg:text-6xl lg:gap-5"
                     >
                       <span className="relative inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-bb-lime after:transition-transform after:duration-500 after:ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:after:scale-x-100">
                         {link.name}

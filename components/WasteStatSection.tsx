@@ -98,13 +98,27 @@ export default function WasteStatSection() {
       className="waste-stat-section relative flex w-full items-center justify-center overflow-hidden py-28 md:py-40"
     >
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-6 text-center">
-        {/* Eyebrow */}
+        {/* Section header */}
         <p
-          className={`waste-stat-eyebrow text-xs font-semibold uppercase tracking-[0.22em] text-bb-deep/80 md:text-sm ${
+          className={`waste-stat-eyebrow sport-kicker text-bb-mid ${
             hasStarted ? "is-in" : ""
           }`}
         >
-          Pickleball Creates
+          The Problem
+        </p>
+        <h2
+          className={`waste-stat-eyebrow sport-display mt-3 text-4xl text-bb-deep md:text-6xl ${
+            hasStarted ? "is-in" : ""
+          }`}
+        >
+          Pickleball has a waste problem.
+        </h2>
+        <p
+          className={`waste-stat-eyebrow mt-8 text-xs font-semibold uppercase tracking-[0.22em] text-bb-deep/60 md:mt-12 md:text-sm ${
+            hasStarted ? "is-in" : ""
+          }`}
+        >
+          Every year, pickleball creates
         </p>
 
         {/* Stat Number */}
@@ -138,7 +152,7 @@ export default function WasteStatSection() {
             hasStarted ? "is-in" : ""
           }`}
         >
-          pounds of plastic waste, every year.
+          pounds of plastic waste — cracked balls headed straight to landfills.
         </p>
 
         {/* Animated divider line */}
@@ -149,11 +163,38 @@ export default function WasteStatSection() {
           }}
           aria-hidden
         />
+
+        {/* Stat tiles — sports box score energy */}
+        <div className="mt-12 grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4 md:mt-16">
+          {[
+            { stat: "2.2M+", label: "Balls cracked every year", sub: "Most tossed after one bad bounce" },
+            { stat: "10-15", label: "Games per outdoor ball", sub: "Then it splits and gets benched" },
+            { stat: "#1", label: "Fastest-growing sport in the US", sub: "More players, more broken balls" },
+            { stat: "0", label: "Programs before us", sub: "Every cracked ball was landfill" },
+          ].map((t) => (
+            <div
+              key={t.stat}
+              className="rounded-xl border border-black/10 bg-bb-paper p-5 text-left"
+            >
+              <div className="flex items-center gap-2">
+                <span className="slash-pair text-bb-mid" aria-hidden>
+                  <span />
+                  <span />
+                </span>
+                <p className="sport-display text-4xl text-bb-deep">{t.stat}</p>
+              </div>
+              <p className="mt-2 text-xs font-black tracking-wide text-bb-deep uppercase">
+                {t.label}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-bb-deep/55">{t.sub}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <style jsx>{`
         .waste-stat-section {
-          background: transparent;
+          background: #ffffff;
         }
 
         .waste-stat-eyebrow,

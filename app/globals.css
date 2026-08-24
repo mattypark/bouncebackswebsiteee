@@ -8,6 +8,12 @@
   --color-bb-cream: #FBFFF1;
   --color-bb-red: #A83232;
 
+  /* Sports / e-com rebrand tokens (BOUNCEBACK PICKLE PERFORMANCE) */
+  --color-bb-ink: #084734;
+  --color-bb-paper: #f6f6f2;
+  --color-bb-court: #e9e9e2;
+  --color-bb-volt: #c6f000;
+
   --font-inter: "Inter", sans-serif;
 
   --animate-fade-in-up: fadeInUp 0.8s ease-out both;
@@ -171,4 +177,59 @@
   box-shadow:
     0 8px 32px rgba(8, 71, 52, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ───────────────────────────────────────────────
+   Sports rebrand — slash motif & type utilities
+   ─────────────────────────────────────────────── */
+
+/* Double speed-slash mark: ⫽⫽ built from skewed bars */
+.slash-pair {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.slash-pair span {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  background: currentColor;
+  transform: skewX(-24deg);
+}
+
+.slash-pair span:first-child {
+  width: 16px;
+}
+
+/* Sports eyebrow/kicker text */
+.sport-kicker {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* Big condensed sports display type */
+.sport-display {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+
+/* Sports hero backdrop — ink court with volt glow */
+.hero-gradient-sport {
+  background:
+    radial-gradient(1200px 600px at 78% 45%, rgba(206, 241, 123, 0.16) 0%, transparent 60%),
+    linear-gradient(180deg, #052e21 0%, #084734 100%);
+}
+
+/* Hide the scrollbar on drag-scroll rails (state explorer) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

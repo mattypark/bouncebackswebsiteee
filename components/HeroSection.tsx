@@ -2,15 +2,14 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import CartIcon from "./CartIcon";
+import BrandLogo from "./BrandLogo";
 
 const menuLinks = [
   { name: "Home", href: "/" },
-  { name: "Buy Balls", href: "/bb-1" },
+  { name: "Shop", href: "/shop" },
+  { name: "About", href: "/about" },
   { name: "Order a Bin", href: "/request-bin" },
   { name: "Bin Locations", href: "/locations" },
-  { name: "Shop All", href: "/shop" },
-  { name: "About", href: "/about" },
   { name: "Account", href: "/account" },
 ];
 
@@ -39,22 +38,44 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="hero-gradient relative h-screen w-full overflow-hidden">
+    <section className="hero-gradient-sport relative h-screen w-full overflow-hidden">
       {/* ─── Navigation ─── */}
       <nav className="fixed top-0 left-0 z-50 flex w-full items-center justify-between px-10 py-4 transition-colors duration-300 md:px-12 md:py-5 lg:px-16 lg:py-6">
         <a
           href="/"
-          className="flex items-baseline text-xl transition-colors duration-300 md:text-2xl"
+          className="transition-colors duration-300"
           style={{ zIndex: 60, color: isMenuOpen ? "#fff" : isPastHero ? "#084734" : "#fff" }}
         >
-          <span className="font-bold tracking-tight">Bounce</span>
-          <span className="font-light tracking-tight">Back</span>
+          <BrandLogo size="sm" />
         </a>
 
 
+        {/* Desktop inline links */}
+        <div className="hidden items-center gap-8 lg:flex">
+          {[
+            { name: "Shop", href: "/shop" },
+            { name: "Our Story", href: "/about" },
+            { name: "Locations", href: "/locations" },
+          ].map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="sport-kicker transition-opacity duration-200 hover:opacity-60"
+              style={{ color: isMenuOpen ? "#fff" : isPastHero ? "#084734" : "#fff" }}
+            >
+              {link.name}
+            </a>
+          ))}
+          <a
+            href="/shop"
+            className="bg-bb-deep px-6 py-3 text-xs font-black tracking-[0.2em] text-bb-volt uppercase transition-colors duration-200 hover:bg-bb-volt hover:text-bb-deep"
+          >
+            Shop Now
+          </a>
+        </div>
+
         {/* Cart + Hamburger */}
         <div className="flex items-center gap-5">
-          <CartIcon color={isMenuOpen ? "#CEF17B" : isPastHero ? "#084734" : "#FBFFF1"} />
 
           {/* Hamburger / X button */}
           <button
@@ -102,7 +123,7 @@ export default function HeroSection() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
-            className="fixed inset-0 z-[55] flex flex-col bg-bb-deep"
+            className="fixed inset-0 z-[55] flex flex-col bg-bb-ink"
             initial={{ clipPath: `circle(0% at ${clipOrigin})` }}
             animate={{ clipPath: `circle(150% at ${clipOrigin})` }}
             exit={{ clipPath: `circle(0% at ${clipOrigin})` }}
@@ -144,8 +165,7 @@ export default function HeroSection() {
                     <a
                       href={link.href}
                       onClick={() => setIsMenuOpen(false)}
-                      className="group relative inline-flex items-center gap-3 overflow-visible py-2 text-4xl font-light text-bb-lime/90 transition-colors duration-300 hover:text-bb-lime md:text-5xl md:gap-4 lg:text-6xl lg:gap-5"
-                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+                      className="sport-display group relative inline-flex items-center gap-3 overflow-visible py-2 text-4xl text-white/90 transition-colors duration-300 hover:text-bb-volt md:text-5xl md:gap-4 lg:text-6xl lg:gap-5"
                     >
                       <span className="relative inline-block after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-bb-lime after:transition-transform after:duration-500 after:ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:after:scale-x-100">
                         {link.name}
@@ -236,49 +256,30 @@ export default function HeroSection() {
           <div className="animate-line-extend h-[1.5px] bg-white" style={{ width: "clamp(60px, 14vw, 120px)" }} />
         </div>
 
-        <h1 className="text-[clamp(2.2rem,8vw,3.5rem)] font-bold leading-[1.05] text-white">
-          Saving the
+        <h1 className="sport-display text-[clamp(2.2rem,8vw,3.5rem)] text-white">
+          <span className="text-bb-volt">Play Hard.</span>
           <br />
-          World
+          Bounce Back.
         </h1>
 
-        {/* Brand mark — direct association with recycling services (Class 40) */}
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-bb-cream/95 px-3 py-1.5 shadow-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/bbbblogo.png"
-            alt="BounceBack Pickle recycling services"
-            className="h-5 w-5 object-contain"
-          />
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-bb-deep">
-            BounceBack Recycling
-          </span>
-        </div>
-
-        <p className="mt-3 text-xs leading-relaxed text-white/90" style={{ maxWidth: "min(340px, 70vw)" }}>
-          Pickleball&apos;s first closed-loop recycling bin. Drop your
-          cracked balls in — we collect, grind, and remold them into
-          new ones. Available now.
+        <p className="mt-3 text-xs leading-relaxed text-white/80" style={{ maxWidth: "min(340px, 70vw)" }}>
+          Pro-spec pickleballs remolded from the cracked balls in our
+          recycling bins. Same feel. Same bounce. Zero landfill.
         </p>
 
         <div className="animate-fade-in-up-delayed-3 mt-5 flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <a
-              href="/request-bin"
-              className="inline-block border-2 border-white px-5 py-2.5 text-[10px] font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep"
+              href="/shop/12"
+              className="inline-block bg-bb-volt px-5 py-2.5 text-[10px] font-black tracking-[0.15em] text-bb-ink transition-all duration-300 hover:bg-white"
             >
-              ORDER A RECYCLING BIN
+              BUY BB-1
             </a>
             <a
-              href="/bb-1"
-              className="relative inline-block select-none"
+              href="/request-bin"
+              className="inline-block border-2 border-white px-5 py-2.5 text-[10px] font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-ink"
             >
-              <span className="inline-block border-2 border-bb-lime bg-bb-lime px-5 py-2.5 text-[10px] font-bold tracking-[0.15em] text-bb-deep shadow-[0_0_24px_rgba(206,241,123,0.45)] transition-all duration-300 hover:bg-white hover:border-white">
-                PREORDER BB-1
-              </span>
-              <span className="absolute -top-2 -right-2 rotate-[8deg] rounded-sm bg-white px-1.5 py-0.5 text-[8px] font-bold tracking-[0.15em] text-bb-deep shadow">
-                NEW
-              </span>
+              ORDER A BIN
             </a>
           </div>
           <a
@@ -306,52 +307,32 @@ export default function HeroSection() {
         </div>
 
         {/* Headline */}
-        <h1 className="animate-fade-in-up-delayed-1 mt-6 text-6xl font-bold leading-[1.05] text-white lg:text-7xl xl:text-8xl">
-          Saving the
+        <h1 className="sport-display animate-fade-in-up-delayed-1 mt-6 text-6xl text-white lg:text-7xl xl:text-8xl">
+          <span className="text-bb-volt">Play Hard.</span>
           <br />
-          World
+          Bounce Back.
         </h1>
 
-        {/* Brand mark — shown in direct association with the recycling
-            services copy below (USPTO Class 40 specimen requirement). */}
-        <div className="animate-fade-in-up-delayed-2 mt-6 inline-flex items-center gap-2.5 rounded-full bg-bb-cream/95 px-3.5 py-2 shadow-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/bbbblogo.png"
-            alt="BounceBack Pickle recycling services"
-            className="h-7 w-7 object-contain"
-          />
-          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-bb-deep">
-            BounceBack Recycling
-          </span>
-        </div>
-
-        {/* Body text — recycling services offered */}
-        <p className="animate-fade-in-up-delayed-2 mt-4 max-w-[420px] text-sm leading-relaxed text-white/90 lg:text-base">
-          Pickleball&apos;s first closed-loop recycling bin.
-          <br />
-          We&apos;re turning the fastest growing sport into the first sustainable sport.
+        {/* Body text */}
+        <p className="animate-fade-in-up-delayed-2 mt-6 max-w-[420px] text-sm leading-relaxed text-white/80 lg:text-base">
+          Pro-spec pickleballs remolded from the cracked balls in our recycling
+          bins. Same feel. Same bounce. Zero landfill.
         </p>
 
         {/* CTA Buttons */}
         <div className="animate-fade-in-up-delayed-3 mt-7 inline-flex flex-col gap-4">
           <div className="flex items-center gap-4">
             <a
-              href="/request-bin"
-              className="inline-block border-2 border-white px-8 py-3.5 text-xs font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-deep"
+              href="/shop/12"
+              className="inline-block bg-bb-volt px-8 py-3.5 text-xs font-black tracking-[0.15em] text-bb-ink transition-all duration-300 hover:bg-white"
             >
-              ORDER A RECYCLING BIN
+              BUY BB-1
             </a>
             <a
-              href="/bb-1"
-              className="relative inline-block select-none"
+              href="/request-bin"
+              className="inline-block border-2 border-white px-8 py-3.5 text-xs font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:bg-white hover:text-bb-ink"
             >
-              <span className="inline-block border-2 border-bb-lime bg-bb-lime px-8 py-3.5 text-xs font-bold tracking-[0.15em] text-bb-deep shadow-[0_0_32px_rgba(206,241,123,0.45)] transition-all duration-300 hover:bg-white hover:border-white">
-                PREORDER BB-1
-              </span>
-              <span className="absolute -top-2.5 -right-2.5 rotate-[8deg] rounded-sm bg-white px-2 py-0.5 text-[9px] font-bold tracking-[0.15em] text-bb-deep shadow">
-                NEW
-              </span>
+              ORDER A RECYCLING BIN
             </a>
           </div>
           <a
@@ -373,9 +354,9 @@ export default function HeroSection() {
         alt="BB-1 Recycled Pickleball"
         className="animate-scale-in pointer-events-none absolute z-20 hidden md:block"
         style={{
-          width: "clamp(450px, 55vw, 1300px)",
+          width: "clamp(420px, 46vw, 1000px)",
           height: "auto",
-          right: "-5%",
+          right: "-3%",
           top: "50%",
           transform: "translateY(-45%)",
         }}

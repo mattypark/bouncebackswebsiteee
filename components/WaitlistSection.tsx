@@ -99,12 +99,12 @@ export default function WaitlistSection() {
   }
 
   return (
-    <section id="waitlist" className="relative w-full overflow-hidden bg-bb-cream pt-32 pb-64 md:pt-48 md:pb-80 lg:pt-64 lg:pb-[32rem]">
+    <section id="waitlist" className="relative w-full overflow-hidden bg-bb-deep pt-32 pb-64 md:pt-48 md:pb-80 lg:pt-64 lg:pb-[32rem]">
       {/* ── Floating decorative lime circles ── */}
       {balls.map((b) => (
         <div
           key={b.id}
-          className={`pointer-events-none absolute rounded-full bg-bb-lime ${b.base}`}
+          className={`pointer-events-none absolute rounded-full bg-bb-lime/15 ${b.base}`}
           style={{
             animation: `${b.id} ${b.duration}s ease-in-out infinite`,
             willChange: "transform",
@@ -114,22 +114,22 @@ export default function WaitlistSection() {
 
       {/* ── Content ── */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
-        <h2 className="text-4xl font-bold tracking-tight text-black md:text-5xl lg:text-[64px] lg:leading-[1.1]">
+        <h2 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-[64px] lg:leading-[1.1]">
           Join our waitlist
         </h2>
 
-        <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-black/50 md:mt-6 md:text-base lg:text-lg">
+        <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/60 md:mt-6 md:text-base lg:text-lg">
           We&apos;re changing the environment. Join the waitlist be the first to hear about BounceBack's next steps.
         </p>
 
         {/* Email input bar */}
         <form onSubmit={handleSubmit} className="relative mx-auto mt-10 max-w-[560px] md:mt-14">
-          <span className="absolute -top-3 left-4 z-10 bg-bb-cream px-1.5 text-xs font-medium text-bb-mid">
+          <span className="absolute -top-3 left-4 z-10 bg-bb-deep px-1.5 text-xs font-medium text-bb-lime">
             Email Address
           </span>
 
           <div className="flex items-stretch overflow-hidden rounded-xl">
-            <div className="flex flex-1 items-center bg-bb-deep">
+            <div className="flex flex-1 items-center bg-white/10">
               <input
                 type="email"
                 required
@@ -153,27 +153,13 @@ export default function WaitlistSection() {
           {message && (
             <p
               className={`mt-4 text-sm font-medium ${
-                status === "success" ? "text-bb-deep" : "text-red-600"
+                status === "success" ? "text-bb-lime" : "text-red-300"
               }`}
             >
               {message}
             </p>
           )}
         </form>
-
-        {/* Brand mark */}
-        <div className="mt-16 flex flex-col items-center gap-3 md:mt-20">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/bbbblogo.png"
-            alt="BounceBack Pickle logo"
-            className="h-auto w-[130px] md:w-[160px]"
-          />
-          <p className="max-w-sm text-xs leading-relaxed text-black/40">
-            BounceBack Pickle — pickleball recycling services and recycled
-            pickleballs.
-          </p>
-        </div>
       </div>
     </section>
   );

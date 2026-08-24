@@ -12,12 +12,13 @@ function TextRevealSection({
   text,
   id,
   className,
-  glass = false,
+  light = false,
 }: {
   text: string;
   id?: string;
   className?: string;
-  glass?: boolean;
+  /** White text for dark backgrounds */
+  light?: boolean;
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wordsRef = useRef<HTMLSpanElement[]>([]);
@@ -68,14 +69,16 @@ function TextRevealSection({
     <section
       ref={sectionRef}
       id={id}
-      className={className || "flex w-full items-center justify-center py-24 md:py-32"}
+      className={
+        className || "flex w-full items-center justify-center bg-white py-24 md:py-32"
+      }
     >
-      <div
-        className={`mx-auto max-w-4xl px-8 md:px-14 lg:px-20 ${
-          glass ? "glass-card rounded-3xl py-12 md:py-16" : ""
-        }`}
-      >
-        <p className="text-center text-3xl font-bold leading-snug text-bb-deep md:text-4xl lg:text-5xl">
+      <div className="mx-auto max-w-4xl px-8 md:px-14 lg:px-20">
+        <p
+          className={`text-center text-3xl font-bold leading-snug md:text-4xl lg:text-5xl ${
+            light ? "text-white" : "text-bb-deep"
+          }`}
+        >
           {words.map((word, i) => (
             <span
               key={i}

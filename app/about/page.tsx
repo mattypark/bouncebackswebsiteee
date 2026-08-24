@@ -4,10 +4,14 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
+import SiteFooter from "@/components/SiteFooter";
 
-/* ───────────────────────────────────────────── */
-/*  Stagger wrapper — fades children in on view  */
-/* ───────────────────────────────────────────── */
+/*
+  Our Story — rebuilt on the sports system (ink / paper / volt, sport-display
+  type, slash motif). The old milestone timeline is gone; the story now runs
+  hero → founder → values → the numbers → CTA.
+*/
+
 function Reveal({
   children,
   delay = 0,
@@ -34,38 +38,38 @@ function Reveal({
   );
 }
 
-/* ───────────────────────────────────────────── */
-/*  Values data                                  */
-/* ───────────────────────────────────────────── */
-const values = [
+function Slash({ className = "" }: { className?: string }) {
+  return (
+    <span className={`slash-pair ${className}`} aria-hidden>
+      <span />
+      <span />
+    </span>
+  );
+}
+
+const VALUES = [
   {
     number: "01",
     title: "Sustainability First",
-    body: "Every ball we make is 100% recycled. We built BounceBack on the belief that the industry deserves a real solution to its waste problem, and we're transparent about every step of how we deliver it – from collection to court.",
+    body: "Every ball we make is 100% recycled. We built BounceBack on the belief that the industry deserves a real solution to its waste problem, and we're transparent about every step — from collection to court.",
   },
   {
     number: "02",
     title: "Player-Grade Performance",
-    body: "Recycled doesn't mean compromised. The BB-1 is built to meet the same bounce, weight, and durability standards as the top balls on the market. Sustainability only wins if the product can stand on its own.",
+    body: "Recycled doesn't mean compromised. The BB-1 meets the same bounce, weight, and durability standards as the top balls on the market. Sustainability only wins if the product stands on its own.",
   },
   {
     number: "03",
     title: "Community Driven",
-    body: "From our recycling bin program to partnerships with courts and clubs, BounceBack is built on the energy of players who care about the sport and the planet.",
+    body: "From our recycling bin program to partnerships with courts and clubs, BounceBack runs on the energy of players who care about the sport and the planet.",
   },
 ];
 
-const milestones = [
-  { year: "Jan 2025", text: "The idea for BounceBack comes to life — a mission to recycle every cracked pickleball instead of sending it to landfill." },
-  { year: "Mar 2025", text: "First BounceBack recycling bin placed at a local facility, kicking off the collection program." },
-  { year: "Jul 2025", text: "Recycling network expands across Southwest Florida. Partnered with the RePickle Project to collect balls in 7 additional states." },
-  { year: "Oct 2025", text: "Prototype manufacturing begins — turning recycled pickleball material into the BB-1." },
-  { year: "Nov 2025", text: "BounceBack goes viral, gaining millions of views across social media and building massive hype for the mission." },
-  { year: "Dec 2025", text: "Los Angeles expansion explored, bringing BounceBack's recycling program to the West Coast." },
-  { year: "Jan 2026", text: "Prototypes return for testing. BounceBack featured on ABC7 and The Observer, bringing national attention to the mission." },
-  { year: "Feb 2026", text: "BB-1 quality confirmed — prototypes pass rigorous performance testing. Featured in WGCU and ABC Gulf Coast." },
-  { year: "Mar 2026", text: "Exploring U.S. manufacturing partners for full-scale BB-1 production." },
-  { year: "Apr 2026", text: "Nationwide recycling program launches — every court, every club, every cracked ball gets a second life." },
+const NUMBERS = [
+  { stat: "2.2M+", label: "Balls cracked every year", sub: "Headed straight to landfill" },
+  { stat: "10,000+", label: "Balls recycled so far", sub: "Collected through our bins" },
+  { stat: "#1", label: "Fastest-growing sport in the US", sub: "More players, more broken balls" },
+  { stat: "0", label: "Programs before us", sub: "We built the first closed loop" },
 ];
 
 export default function AboutPage() {
@@ -78,97 +82,81 @@ export default function AboutPage() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
-    <div className="min-h-screen bg-bb-cream text-bb-deep overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-bb-paper text-bb-ink">
       <NavBar variant="dark" />
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  HERO — Full-width parallax intro          */}
-      {/* ═══════════════════════════════════════════ */}
+      {/* ══════════ HERO ══════════ */}
       <section
         ref={heroRef}
-        className="relative flex min-h-[85vh] w-full items-center justify-center overflow-hidden"
+        className="relative flex min-h-[80vh] w-full items-center justify-center overflow-hidden"
       >
-        {/* Giant background text */}
         <motion.h1
           style={{ y: heroY, opacity: heroOpacity }}
-          className="pointer-events-none absolute select-none font-black leading-none text-bb-deep/[0.04] whitespace-nowrap"
+          className="sport-display pointer-events-none absolute leading-none whitespace-nowrap text-bb-ink/[0.05] select-none"
           aria-hidden
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2 }}
         >
-          <span
-            style={{
-              fontSize: "clamp(5rem, 28vw, 42rem)",
-              letterSpacing: "-0.04em",
-            }}
-          >
-            ABOUT
-          </span>
+          <span style={{ fontSize: "clamp(5rem, 28vw, 42rem)" }}>ABOUT</span>
         </motion.h1>
 
-        {/* Hero content */}
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-8 text-center">
+        <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-8 pt-24 text-center">
+          <motion.div
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Slash className="text-bb-mid" />
+            <p className="sport-kicker text-bb-mid">Our Story</p>
+          </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="text-4xl font-bold leading-[1.1] tracking-tight text-bb-deep md:text-6xl lg:text-7xl"
+            className="sport-display mt-6 text-5xl text-bb-ink md:text-7xl lg:text-8xl"
           >
-            Our story
+            Built to play.
             <br />
-            <span
-              className="italic font-light"
-              style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-            >
-              to change the planet.
-            </span>
+            <span className="text-bb-mid">Built to come back.</span>
           </motion.h2>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-8 max-w-xl text-base leading-relaxed text-bb-deep/55 md:text-lg"
+            className="mt-8 max-w-xl text-base leading-relaxed text-bb-ink/60 md:text-lg"
           >
-            BounceBack is on a mission to eliminate pickleball waste. The world&apos;s first closed-loop
-            pickleball recycling company, keeping the sport we love sustainable without a sacrifice in performance.
+            BounceBack is on a mission to eliminate pickleball waste — the world&apos;s
+            first closed-loop pickleball company, keeping the sport we love sustainable
+            without giving up a thing on performance.
           </motion.p>
 
-          {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.8 }}
-            className="mt-16 flex flex-col items-center gap-2"
+            className="mt-14 flex flex-col items-center gap-2"
           >
-            <span className="text-[10px] font-semibold tracking-[0.2em] text-bb-deep/30 uppercase">
-              Scroll
-            </span>
+            <span className="sport-kicker text-bb-ink/30">Scroll</span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-              className="h-8 w-[1px] bg-bb-deep/20"
+              className="h-8 w-[1px] bg-bb-ink/20"
             />
           </motion.div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  FOUNDER — Dillon Rosenthal                */}
-      {/* ═══════════════════════════════════════════ */}
-      <section className="relative w-full bg-bb-deep py-24 md:py-32 lg:py-40 overflow-hidden">
-        {/* Decorative gradient orbs */}
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-bb-mid/10 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-bb-lime/8 blur-[100px]" />
-
+      {/* ══════════ FOUNDER ══════════ */}
+      <section className="hero-gradient-sport relative w-full overflow-hidden py-24 md:py-32">
         <div className="relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-16 px-8 md:flex-row md:items-start md:gap-20 lg:px-16">
-          {/* Photo */}
           <Reveal className="relative shrink-0" delay={0.1}>
             <div className="relative">
-              {/* Lime accent frame offset behind photo */}
-              <div className="absolute -bottom-4 -right-4 h-full w-full rounded-2xl border-2 border-bb-lime/30" />
-              <div className="relative h-[380px] w-[300px] overflow-hidden rounded-2xl bg-bb-cream/10 md:h-[480px] md:w-[360px]">
+              <div className="absolute -right-4 -bottom-4 h-full w-full rounded-2xl border-2 border-bb-volt/30" />
+              <div className="relative h-[380px] w-[300px] overflow-hidden rounded-2xl bg-white/5 md:h-[480px] md:w-[360px]">
                 <Image
                   src="/dillon.png"
                   alt="Dillon Rosenthal — Founder of BounceBack"
@@ -177,107 +165,89 @@ export default function AboutPage() {
                   className="h-full w-full object-cover object-top"
                 />
               </div>
-              {/* Floating label */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute -bottom-6 -left-4 rounded-full bg-bb-lime px-5 py-2.5 shadow-lg md:-left-8"
+                className="absolute -bottom-5 -left-4 bg-bb-volt px-5 py-2.5 md:-left-8"
               >
-                <span className="text-xs font-bold tracking-[0.12em] text-bb-deep uppercase">
-                  Founder & CEO
+                <span className="text-[10px] font-black tracking-[0.18em] text-bb-ink uppercase">
+                  Founder &amp; CEO
                 </span>
               </motion.div>
             </div>
           </Reveal>
 
-          {/* Bio text */}
           <div className="flex flex-1 flex-col justify-center text-left">
             <Reveal delay={0.15}>
-              <p
-                className="text-sm font-light tracking-[0.2em] text-bb-lime/50 uppercase"
-                style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-              >
-                Meet the Founder
-              </p>
+              <div className="flex items-center gap-3">
+                <Slash className="text-bb-volt" />
+                <p className="sport-kicker text-bb-volt/70">Meet the Founder</p>
+              </div>
             </Reveal>
 
             <Reveal delay={0.25}>
-              <h3 className="mt-4 text-4xl font-bold text-bb-cream md:text-5xl lg:text-6xl">
+              <h3 className="sport-display mt-5 text-5xl text-white md:text-6xl lg:text-7xl">
                 Dillon
                 <br />
-                <span className="text-bb-lime">Rosenthal</span>
+                <span className="text-bb-volt">Rosenthal</span>
               </h3>
             </Reveal>
 
-            <Reveal delay={0.35}>
-              <div className="mt-6 h-[2px] w-16 bg-bb-lime/40" />
-            </Reveal>
-
             <Reveal delay={0.4}>
-              <p className="mt-6 max-w-lg text-base leading-relaxed text-bb-cream/60 md:text-lg">
+              <p className="mt-7 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
                 As an avid pickleball player, Dillon saw firsthand the staggering amount of
-                plastic waste the sport generates. Cracked balls tossed after every session with
-                no end of life solution.
+                plastic waste the sport generates — cracked balls tossed after every session
+                with no end-of-life solution.
               </p>
             </Reveal>
 
             <Reveal delay={0.5}>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-bb-cream/60 md:text-lg">
+              <p className="mt-4 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
                 That concern turned into a question worth solving:{" "}
-                <span className="font-semibold text-bb-lime/90 italic">
-                  &quot;What if we could turn every discarded pickleball into a brand-new one?&quot;
+                <span className="font-bold text-bb-volt">
+                  what if every discarded pickleball became a brand-new one?
                 </span>
               </p>
             </Reveal>
 
-            <Reveal delay={0.55}>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-bb-cream/60 md:text-lg">
-                As an entrepreneurship student with a love for startups and an obsession with
-                product quality, Dillon set out to prove that recycled can mean elite.
-              </p>
-            </Reveal>
-
             <Reveal delay={0.6}>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-bb-cream/60 md:text-lg">
-                Today, BounceBack is actively building the first closed-loop recycling system for
-                pickleballs, collecting, processing, and remanufacturing balls that play just
-                as well as anything on the market, while cleaning up our game.
+              <p className="mt-4 max-w-lg text-base leading-relaxed text-white/65 md:text-lg">
+                Today BounceBack runs the first closed-loop recycling system for pickleballs —
+                collecting, processing, and remanufacturing balls that play as well as anything
+                on the market, while cleaning up our game.
               </p>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  VALUES — Three pillars                    */}
-      {/* ═══════════════════════════════════════════ */}
-      <section className="w-full bg-bb-cream py-24 md:py-32 lg:py-40">
+      {/* ══════════ VALUES ══════════ */}
+      <section className="w-full bg-bb-paper py-24 md:py-32">
         <div className="mx-auto max-w-6xl px-8 lg:px-16">
           <Reveal>
-            <p
-              className="text-sm font-light tracking-[0.2em] text-bb-deep/40 uppercase"
-              style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-            >
-              What We Stand For
-            </p>
+            <div className="flex items-center gap-3">
+              <Slash className="text-bb-mid" />
+              <p className="sport-kicker text-bb-mid">What We Stand For</p>
+            </div>
           </Reveal>
           <Reveal delay={0.1}>
-            <h3 className="mt-4 text-3xl font-bold text-bb-deep md:text-5xl">
+            <h3 className="sport-display mt-5 text-4xl text-bb-ink md:text-6xl">
               Our Values
             </h3>
           </Reveal>
 
-          <div className="mt-16 grid grid-cols-1 gap-0 md:grid-cols-3">
-            {values.map((v, i) => (
+          <div className="mt-14 grid grid-cols-1 gap-0 md:grid-cols-3">
+            {VALUES.map((v, i) => (
               <Reveal key={v.number} delay={0.1 + i * 0.12}>
-                <div className="group relative border-t border-bb-deep/10 py-10 pr-8 md:border-l md:border-t-0 md:py-0 md:pl-8 md:pr-6 first:md:border-l-0 first:md:pl-0">
-                  {/* Hover accent line */}
-                  <div className="absolute left-0 top-0 h-[2px] w-0 bg-bb-lime transition-all duration-500 group-hover:w-full md:h-full md:w-[2px] md:group-hover:h-full md:group-hover:w-[2px]" />
-                  <span className="text-5xl font-black text-bb-lime/30">{v.number}</span>
-                  <h4 className="mt-4 text-xl font-bold text-bb-deep">{v.title}</h4>
-                  <p className="mt-3 text-sm leading-relaxed text-bb-deep/50">{v.body}</p>
+                <div className="group relative border-t border-bb-ink/10 py-10 pr-8 first:md:border-l-0 first:md:pl-0 md:border-t-0 md:border-l md:py-2 md:pr-6 md:pl-8">
+                  <div className="absolute top-0 left-0 h-[2px] w-0 bg-bb-volt transition-all duration-500 group-hover:w-full md:h-full md:w-[2px] md:group-hover:w-[2px]" />
+                  <span className="sport-display text-5xl text-bb-mid/25">{v.number}</span>
+                  <h4 className="mt-4 text-lg font-black tracking-wide text-bb-ink uppercase">
+                    {v.title}
+                  </h4>
+                  <p className="mt-3 text-sm leading-relaxed text-bb-ink/55">{v.body}</p>
                 </div>
               </Reveal>
             ))}
@@ -285,97 +255,57 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  TIMELINE — Journey so far                 */}
-      {/* ═══════════════════════════════════════════ */}
-      <section className="relative w-full bg-bb-mint/40 py-24 md:py-32 lg:py-40 overflow-hidden">
-        <div className="mx-auto max-w-4xl px-8 lg:px-16">
+      {/* ══════════ THE NUMBERS ══════════ */}
+      <section className="w-full bg-bb-court py-20 md:py-24">
+        <div className="mx-auto max-w-6xl px-8 lg:px-16">
           <Reveal>
-            <p
-              className="text-sm font-light tracking-[0.2em] text-bb-deep/40 uppercase"
-              style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
-            >
-              The Journey
-            </p>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <h3 className="mt-4 text-3xl font-bold text-bb-deep md:text-5xl">
-              Our Timeline
-            </h3>
+            <div className="flex items-center gap-3">
+              <Slash className="text-bb-mid" />
+              <p className="sport-kicker text-bb-mid">Why It Matters</p>
+            </div>
           </Reveal>
 
-          <div className="relative mt-16">
-            {/* Vertical line */}
-            <div className="absolute left-[19px] top-0 bottom-0 w-[2px] bg-bb-deep/10 md:left-[23px]" />
-
-            {milestones.map((m, i) => (
-              <Reveal key={i} delay={0.1 + i * 0.1} className="relative mb-12 last:mb-0 pl-14 md:pl-16">
-                {/* Dot */}
-                <div className="absolute left-[12px] top-[6px] h-[16px] w-[16px] rounded-full border-[3px] border-bb-deep bg-bb-cream md:left-[16px] md:h-[16px] md:w-[16px]" />
-                <span className="text-xs font-bold tracking-[0.15em] text-bb-mid uppercase">
-                  {m.year}
-                </span>
-                <p className="mt-1 text-base leading-relaxed text-bb-deep/70 md:text-lg">
-                  {m.text}
-                </p>
+          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {NUMBERS.map((n, i) => (
+              <Reveal key={n.label} delay={i * 0.08}>
+                <div className="h-full rounded-xl border border-black/10 bg-bb-paper p-5">
+                  <div className="flex items-center gap-2">
+                    <Slash className="text-bb-mid" />
+                    <p className="sport-display text-4xl text-bb-ink">{n.stat}</p>
+                  </div>
+                  <p className="mt-2 text-xs font-black tracking-wide text-bb-ink uppercase">
+                    {n.label}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-bb-ink/55">{n.sub}</p>
+                </div>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  CTA — Join the movement                   */}
-      {/* ═══════════════════════════════════════════ */}
-      <section className="relative w-full overflow-hidden">
-        {/* Gradient background matching hero-gradient style */}
-        <div className="hero-gradient absolute inset-0 opacity-90" />
-
-        {/* Scattered pickleball images */}
+      {/* ══════════ CTA ══════════ */}
+      <section className="hero-gradient-sport relative w-full overflow-hidden">
         <motion.div
           className="pointer-events-none absolute z-[1] w-[60px] md:w-[90px]"
-          style={{ top: "12%", left: "6%" }}
+          style={{ top: "14%", left: "7%" }}
           animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <Image src="/bb1-ball.png" alt="" aria-hidden width={90} height={90} className="w-full h-auto opacity-35" />
-        </motion.div>
-        <motion.div
-          className="pointer-events-none absolute z-[1] w-[35px] md:w-[55px]"
-          style={{ top: "28%", right: "10%" }}
-          animate={{ y: [0, 8, 0], rotate: [0, -6, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-        >
-          <Image src="/bb1-ball.png" alt="" aria-hidden width={55} height={55} className="w-full h-auto opacity-30" />
+          <Image src="/bb1-ball.png" alt="" aria-hidden width={90} height={90} className="h-auto w-full opacity-25" />
         </motion.div>
         <motion.div
           className="pointer-events-none absolute z-[1] w-[75px] md:w-[110px]"
-          style={{ bottom: "15%", right: "5%" }}
+          style={{ right: "6%", bottom: "16%" }}
           animate={{ y: [0, -12, 0], rotate: [0, 10, 0] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         >
-          <Image src="/bb1-ball.png" alt="" aria-hidden width={110} height={110} className="w-full h-auto opacity-30" />
-        </motion.div>
-        <motion.div
-          className="pointer-events-none absolute z-[1] w-[45px] md:w-[65px]"
-          style={{ bottom: "22%", left: "8%" }}
-          animate={{ y: [0, 6, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-        >
-          <Image src="/bb1-ball.png" alt="" aria-hidden width={65} height={65} className="w-full h-auto opacity-25" />
-        </motion.div>
-        <motion.div
-          className="pointer-events-none absolute z-[1] w-[28px] md:w-[40px]"
-          style={{ top: "55%", left: "18%" }}
-          animate={{ y: [0, -7, 0], rotate: [0, 12, 0] }}
-          transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        >
-          <Image src="/bb1-ball.png" alt="" aria-hidden width={40} height={40} className="w-full h-auto opacity-25" />
+          <Image src="/bb1-ball.png" alt="" aria-hidden width={110} height={110} className="h-auto w-full opacity-20" />
         </motion.div>
 
         <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-8 py-24 text-center md:py-32">
           <Reveal>
-            <h3 className="text-3xl font-bold text-white md:text-5xl lg:text-6xl">
+            <h3 className="sport-display text-4xl text-white md:text-6xl">
               Ready to play different?
             </h3>
           </Reveal>
@@ -388,35 +318,23 @@ export default function AboutPage() {
           <Reveal delay={0.3}>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
-                href="/#waitlist"
-                className="bg-bb-lime px-10 py-4 text-sm font-semibold tracking-[0.15em] text-bb-deep transition-all duration-300 hover:bg-white hover:shadow-lg"
+                href="/shop/12"
+                className="bg-bb-volt px-10 py-4 text-sm font-black tracking-[0.18em] text-bb-ink uppercase transition-colors duration-300 hover:bg-white"
               >
-                JOIN THE WAITLIST
+                Buy BB-1
               </a>
               <a
-                href="/bb-1"
-                className="border-2 border-white/40 px-10 py-4 text-sm font-semibold tracking-[0.15em] text-white transition-all duration-300 hover:border-white hover:bg-white/10"
+                href="/request-bin"
+                className="border-2 border-white/40 px-10 py-4 text-sm font-semibold tracking-[0.18em] text-white uppercase transition-all duration-300 hover:border-white hover:bg-white/10"
               >
-                VIEW THE BB-1
+                Order a Recycling Bin
               </a>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
-      {/*  FOOTER                                    */}
-      {/* ═══════════════════════════════════════════ */}
-      <footer className="border-t border-bb-deep/10 bg-bb-cream px-10 py-8 md:px-12 lg:px-16">
-        <div className="flex items-end justify-between">
-          <p className="text-sm text-bb-deep/30">
-            recycled pickleballs. built for players. designed for the planet.
-          </p>
-          <p className="text-sm text-bb-deep/30">
-            &copy; {new Date().getFullYear()} BounceBack
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
