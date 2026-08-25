@@ -314,7 +314,7 @@ export default function HeroSection() {
         </h1>
 
         {/* Body text */}
-        <p className="animate-fade-in-up-delayed-2 mt-6 max-w-[420px] text-sm leading-relaxed text-white/80 lg:text-base">
+        <p className="animate-fade-in-up-delayed-2 mt-6 max-w-[min(420px,44vw)] text-sm leading-relaxed text-white/80 lg:text-base">
           Pro-spec pickleballs remolded from the cracked balls in our recycling
           bins. Same feel. Same bounce. Zero landfill.
         </p>
@@ -354,9 +354,11 @@ export default function HeroSection() {
         alt="BB-1 Recycled Pickleball"
         className="animate-scale-in pointer-events-none absolute z-20 hidden md:block"
         style={{
-          width: "clamp(420px, 46vw, 1000px)",
+          // 42vw keeps the ball clear of the copy at the md breakpoint, where
+          // the desktop overlay first kicks in on a still-narrow viewport
+          width: "clamp(300px, 42vw, 1000px)",
           height: "auto",
-          right: "-3%",
+          right: "-4%",
           top: "50%",
           transform: "translateY(-45%)",
         }}

@@ -32,7 +32,8 @@ const PANELS: Record<string, string> = {
 };
 
 export default function ShopPage() {
-  const hundred = PACKS.find((p) => p.pack === "100")!;
+  // Hero card = the 12-pack: the size most players actually buy
+  const hero = PACKS.find((p) => p.pack === "12")!;
 
   return (
     <main className="bg-bb-paper">
@@ -48,37 +49,39 @@ export default function ShopPage() {
         </h1>
       </section>
 
-      {/* Best-value hero card — 100 pack */}
+      {/* Hero card — the 12-pack */}
       <section className="mx-auto max-w-6xl px-6 pt-10">
         <div className="grid overflow-hidden rounded-2xl border border-black/10 bg-white md:grid-cols-2">
           <div className="relative flex items-center justify-center bg-bb-ink p-10">
             <span className="absolute top-5 left-5 rounded-full bg-bb-volt px-3 py-1 text-[10px] font-black tracking-[0.15em] text-bb-ink uppercase">
-              Best Value
+              Most Popular
             </span>
             <Image
-              src={hundred.image}
-              alt="BB-1 100-pack"
+              src={hero.image}
+              alt="BB-1 12-pack"
               width={520}
               height={520}
               className="h-auto w-[80%]"
             />
           </div>
           <div className="flex flex-col justify-center p-8 md:p-12">
-            <p className="sport-kicker text-bb-mid">The Facility Bundle</p>
+            <p className="sport-kicker text-bb-mid">The Player Pack</p>
             <h2 className="sport-display mt-3 text-4xl text-bb-ink md:text-5xl">
-              Stock the whole court.
+              Built for your
+              <br />
+              weekly game.
             </h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-bb-ink/60 md:text-base">
-              100 pro-spec recycled balls. Subscribe for $
-              {hundred.subscription.price.toFixed(2)} and save $
-              {(hundred.onetime.price - hundred.subscription.price).toFixed(2)}{" "}
-              every delivery — free shipping included.
+              12 pro-spec recycled balls — enough for 2-3 sessions a week.
+              Subscribe for ${hero.subscription.price.toFixed(2)} and save $
+              {(hero.onetime.price - hero.subscription.price).toFixed(2)} every
+              delivery.
             </p>
             <a
-              href="/shop/100"
+              href="/shop/12"
               className="mt-7 inline-block w-fit bg-bb-ink px-8 py-4 text-sm font-black tracking-[0.2em] text-bb-volt uppercase transition-colors duration-200 hover:bg-bb-volt hover:text-bb-ink"
             >
-              Get the 100-Pack →
+              Get the 12-Pack →
             </a>
           </div>
         </div>
