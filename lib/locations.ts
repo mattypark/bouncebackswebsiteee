@@ -34,6 +34,7 @@ export const LOCATION_DATA: StateData[] = [
       { name: "Three Oaks Park", city: "Estero", nonprofit: false, coords: [-81.82, 26.42] },
       { name: "Murano", city: "Estero", nonprofit: false, coords: [-81.80, 26.45] },
       { name: "Shadowwood Preserve", city: "Estero", nonprofit: false, coords: [-81.83, 26.43] },
+      { name: "The Commons Club", city: "Estero", nonprofit: false, coords: [-81.80, 26.41] },
       { name: "Ace Pickleball Club", city: "Fort Myers", nonprofit: false, coords: [-81.87, 26.64] },
       { name: "Brooks Community Park", city: "Fort Myers", nonprofit: false, coords: [-81.86, 26.60] },
       { name: "DNA Pickleball", city: "Fort Myers", nonprofit: false, coords: [-81.88, 26.62] },
@@ -98,6 +99,7 @@ export const LOCATION_DATA: StateData[] = [
     coords: [-83.5, 32.7],
     zoomLevel: 5,
     locations: [
+      { name: "The Picklr", city: "Cumming", nonprofit: false, coords: [-84.14, 34.21] },
       { name: "Pickleball Clubs (2)", city: "Saint Mary's", nonprofit: true, coords: [-81.55, 30.73] },
       { name: "Wilmington Island", city: "Savannah", nonprofit: true, coords: [-80.97, 32.00] },
       { name: "Lake Mayer", city: "Savannah", nonprofit: true, coords: [-81.06, 32.02] },
