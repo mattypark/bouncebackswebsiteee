@@ -121,10 +121,10 @@ export default function ProductDetail({ pack }: { pack: Pack }) {
   const price = isSub ? current.subscription.price : current.onetime.price;
   const savings = (current.onetime.price - current.subscription.price).toFixed(2);
 
-  // Gallery: this pack first, then the ball shot, then the other packs
+  // Gallery: the four pack photos, selected pack first. No single-ball render —
+  // every shot in here is a real pack you can buy.
   const gallery = [
     { src: current.image, alt: `BB-1 ${current.label}` },
-    { src: "/bb1-ball.png", alt: "BB-1 ball close-up" },
     ...PACKS.filter((p) => p.pack !== current.pack).map((p) => ({
       src: p.image,
       alt: `BB-1 ${p.label}`,
@@ -159,8 +159,8 @@ export default function ProductDetail({ pack }: { pack: Pack }) {
             </motion.div>
 
             {/* Thumbnail row */}
-            <div className="mt-4 grid grid-cols-6 gap-2">
-              {gallery.slice(0, 6).map((g, i) => (
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {gallery.map((g, i) => (
                 <button
                   key={g.alt + i}
                   onClick={() => setGalleryIdx(i)}
