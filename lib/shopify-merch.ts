@@ -28,7 +28,8 @@ export interface MerchProduct {
   slug: string;
   name: string;
   price: number; // dollars
-  image: string; // /merch/...
+  image: string; // /merch/... — lead photo, also used by the cart
+  gallery?: string[]; // extra photos shown as thumbnails on the card
   description?: string;
   sizes: MerchSize[];
   shippingNote?: string;
@@ -39,7 +40,8 @@ export const MERCH: MerchProduct[] = [
     slug: "bb-tee",
     name: "BounceBack Tee",
     price: 29.99,
-    image: "/merch/bb-tee.jpg",
+    image: "/merch/bb-tee-duo.jpg",
+    gallery: ["/merch/bb-tee-back.jpg", "/merch/bb-tee-pocket.jpg"],
     description:
       "Garment-dyed Comfort Colors pocket tee in ivory, with the BounceBack Athletic Co. mark.",
     sizes: [

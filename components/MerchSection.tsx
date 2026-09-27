@@ -29,16 +29,39 @@ function MerchCard({ product }: { product: MerchProduct }) {
   const variantId = product.sizes.find((s) => s.size === selected)?.variantId ?? "";
   const soldOut = liveSizes.length === 0;
 
+  const photos = [product.image, ...(product.gallery ?? [])];
+  const [activePhoto, setActivePhoto] = useState(0);
+
   return (
     <div className="grid overflow-hidden rounded-2xl border border-black/10 bg-white md:grid-cols-2">
-      <div className="flex aspect-square items-center justify-center bg-bb-court">
+      <div className="relative aspect-[4/5] bg-bb-court">
         <Image
-          src={product.image}
+          src={photos[activePhoto]}
           alt={product.name}
-          width={620}
-          height={620}
-          className="h-full w-full object-cover"
+          fill
+          sizes="(min-width: 768px) 560px, 100vw"
+          className="object-cover"
         />
+
+        {photos.length > 1 && (
+          <div className="absolute bottom-4 left-4 flex gap-2">
+            {photos.map((src, i) => (
+              <button
+                key={src}
+                onClick={() => setActivePhoto(i)}
+                aria-label={`Show photo ${i + 1} of ${photos.length}`}
+                aria-pressed={i === activePhoto}
+                className={`relative h-16 w-12 overflow-hidden rounded-md border-2 transition-all ${
+                  i === activePhoto
+                    ? "border-bb-volt"
+                    : "border-white/60 opacity-70 hover:opacity-100"
+                }`}
+              >
+                <Image src={src} alt="" fill sizes="48px" className="object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col justify-center p-8 md:p-10">

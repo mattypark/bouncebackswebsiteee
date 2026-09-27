@@ -90,6 +90,7 @@ export const LOCATION_DATA: StateData[] = [
       { name: "Portola Valley Pickleball Club", city: "Portola Valley", nonprofit: false, coords: [-122.23, 37.38] },
       { name: "Paseo Club", city: "Valencia", nonprofit: false, coords: [-118.56, 34.41] },
       { name: "The Best Paddle Compound", city: "Los Angeles", nonprofit: false, coords: [-118.35, 34.05] },
+      { name: "Smash Dink", city: "Glendale", nonprofit: false, coords: [-118.28, 34.16] },
     ],
   },
   {
@@ -232,6 +233,16 @@ export const LOCATION_DATA: StateData[] = [
       { name: "Pickled! Woodridge", city: "Woodridge", nonprofit: false, coords: [-88.00, 41.73] },
       { name: "Pickled! Batavia", city: "Batavia", nonprofit: false, coords: [-88.34, 41.86] },
       { name: "Pickled! GameChangers", city: "Channahon", nonprofit: false, coords: [-88.23, 41.43] },
+    ],
+  },
+  {
+    fips: "29",
+    abbr: "MO",
+    name: "Missouri",
+    coords: [-92.5, 38.4],
+    zoomLevel: 5,
+    locations: [
+      { name: "KC Pickle Club", city: "Kansas City", nonprofit: false, coords: [-94.47, 39.06] },
     ],
   },
 ];
