@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import posthog from "posthog-js";
 
 const KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const UI_HOST =
@@ -16,16 +15,24 @@ const UI_HOST =
  */
 export function PostHogAnalytics() {
   useEffect(() => {
-    if (!KEY || posthog.__loaded) return;
-    posthog.init(KEY, {
-      api_host: "/ingest",
-      ui_host: UI_HOST,
-      capture_pageview: "history_change",
-      capture_pageleave: true,
-      person_profiles: "identified_only",
-      persistence: "localStorage",
-      disable_session_recording: true,
+    if (!KEY) return;
+    let cancelled = false;
+    // its own chunk, fetched after the page is up: never weighs on first paint
+    import("posthog-js").then(({ default: posthog }) => {
+      if (cancelled || posthog.__loaded) return;
+      posthog.init(KEY, {
+        api_host: "/ingest",
+        ui_host: UI_HOST,
+        capture_pageview: "history_change",
+        capture_pageleave: true,
+        person_profiles: "identified_only",
+        persistence: "localStorage",
+        disable_session_recording: true,
+      });
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return null;
