@@ -371,12 +371,34 @@ export default function RequestBinPage() {
       return data.rowNumber as number;
     })();
 
-    saveTask.then(() => flashSaved()).catch(() => {
-      setSaveStatus("error");
-      setError("Your info didn't save. Go back and try again.");
+    // A failed sheet write no longer strands the visitor: the backend
+    // captures the lead in Supabase + email, and payment works without a row.
+    saveTask.then(() => flashSaved()).catch((err) => {
+      console.error("Facility sheet save failed:", err);
+      setSaveStatus("idle");
     });
 
     facilitySavePromise.current = saveTask;
+  }
+
+  // Row number from step 2, or null if the sheet write failed. Never throws.
+  async function resolveRowNumber(): Promise<number | null> {
+    if (savedRowNumber) return savedRowNumber;
+    try {
+      return (await facilitySavePromise.current) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  function notifyContact() {
+    // Notify Dillon + send confirmation email + insert into Supabase.
+    // Fire-and-forget so a slow Resend response doesn't block anything.
+    fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    }).catch(() => {});
   }
 
   // Step 3 → update K,L,M on the row from step 2, then fire Resend + Supabase.
@@ -395,13 +417,11 @@ export default function RequestBinPage() {
 
     (async () => {
       try {
-        const rowNumber =
-          savedRowNumber ?? (await facilitySavePromise.current);
+        const rowNumber = await resolveRowNumber();
         if (!rowNumber) {
-          setSaveStatus("error");
-          setError(
-            "Missing row reference. Please go back to Facility Information and resave."
-          );
+          // Sheet is unreachable — still get the full sign-up to Dillon.
+          setSaveStatus("idle");
+          notifyContact();
           return;
         }
         const res = await fetch("/api/sheet-webhook", {
@@ -418,14 +438,7 @@ export default function RequestBinPage() {
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Save failed.");
         flashSaved();
-
-        // Notify Dillon + send confirmation email + insert into Supabase.
-        // Fire-and-forget so a slow Resend response doesn't block anything.
-        fetch("/api/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }).catch(() => {});
+        notifyContact();
 
         // Re-generate the Stripe link with final bin selection so col O
         // has the correct amount. Retries once on failure.
@@ -444,9 +457,9 @@ export default function RequestBinPage() {
     setPaymentStatus("redirecting");
     setError("");
     try {
-      // Make sure step 2 finished saving before we try to pay.
-      const rowNumber =
-        savedRowNumber ?? (await facilitySavePromise.current) ?? null;
+      // Wait for step 2's save, but pay even if the sheet write failed —
+      // Stripe metadata still carries the facility for reconciliation.
+      const rowNumber = await resolveRowNumber();
 
       const res = await fetch("/api/stripe-checkout", {
         method: "POST",
