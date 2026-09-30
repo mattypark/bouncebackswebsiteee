@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import SmoothScroll from "@/components/SmoothScroll";
 import { Analytics } from "@vercel/analytics/next";
+import { PostHogAnalytics } from "./PostHogAnalytics";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
         <SmoothScroll />
         <Providers>{children}</Providers>
         <Analytics />
+        <PostHogAnalytics />
       </body>
     </html>
   );
