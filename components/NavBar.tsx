@@ -10,6 +10,7 @@ const menuLinks = [
   { name: "About", href: "/about" },
   { name: "Order a Bin", href: "/request-bin" },
   { name: "Bin Locations", href: "/locations" },
+  { name: "Ambassadors", href: "/ambassador" },
   { name: "Account", href: "/account" },
 ];
 

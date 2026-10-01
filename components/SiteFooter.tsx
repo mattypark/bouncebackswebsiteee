@@ -23,6 +23,7 @@ const COLUMNS: { heading: string; links: { name: string; href: string }[] }[] = 
       { name: "Our Story", href: "/about" },
       { name: "Bin Locations", href: "/locations" },
       { name: "Order a Bin", href: "/request-bin" },
+      { name: "Become an Ambassador", href: "/ambassador" },
     ],
   },
   {
