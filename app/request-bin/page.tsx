@@ -84,6 +84,8 @@ const TOTAL_STEPS = 5; // 0=welcome, 1=contact, 2=facility, 3=program, 4=payment
 
 const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ZIP_RX = /^\d{5}(-\d{4})?$/;
+// Longest "Pay now" waits on the step-2 sheet save before going to Stripe anyway.
+const PAY_SAVE_WAIT_MS = 12_000;
 
 
 export default function RequestBinPage() {
@@ -152,6 +154,12 @@ export default function RequestBinPage() {
     if (savedToastTimerRef.current) clearTimeout(savedToastTimerRef.current);
     savedToastTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2200);
   }
+
+  // Wake the backend now so the save and checkout calls minutes from now
+  // don't sit through a cold start.
+  useEffect(() => {
+    fetch("/api/warm", { cache: "no-store" }).catch(() => {});
+  }, []);
 
   // Restore form state from sessionStorage on mount (one-time).
   useEffect(() => {
@@ -382,13 +390,16 @@ export default function RequestBinPage() {
   }
 
   // Row number from step 2, or null if the sheet write failed. Never throws.
-  async function resolveRowNumber(): Promise<number | null> {
+  // `maxWaitMs` caps the wait for a save still in flight; null comes back if
+  // it hasn't finished by then (payment still works, ops reconcile by email).
+  async function resolveRowNumber(maxWaitMs?: number): Promise<number | null> {
     if (savedRowNumber) return savedRowNumber;
-    try {
-      return (await facilitySavePromise.current) ?? null;
-    } catch {
-      return null;
-    }
+    const pending = facilitySavePromise.current;
+    if (!pending) return null;
+    const settled = pending.then((row) => row ?? null).catch(() => null);
+    if (!maxWaitMs) return settled;
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), maxWaitMs));
+    return Promise.race([settled, timeout]);
   }
 
   function notifyContact() {
@@ -457,9 +468,9 @@ export default function RequestBinPage() {
     setPaymentStatus("redirecting");
     setError("");
     try {
-      // Wait for step 2's save, but pay even if the sheet write failed —
-      // Stripe metadata still carries the facility for reconciliation.
-      const rowNumber = await resolveRowNumber();
+      // Wait for step 2's save, but pay even if the sheet write failed or
+      // is still running — Stripe metadata carries the facility either way.
+      const rowNumber = await resolveRowNumber(PAY_SAVE_WAIT_MS);
 
       const res = await fetch("/api/stripe-checkout", {
         method: "POST",
