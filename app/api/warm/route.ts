@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:4000";
 
-// The Railway backend sleeps when idle and takes ~35s to wake. The sign-up
+// The backend runs on Render's free tier, which spins down after 15 minutes
+// idle and takes 20–50s to wake. The sign-up
 // page pings this on load so the backend is awake by the time the visitor
 // reaches "Pay now", instead of the first real request paying for the wake.
 export async function GET() {
