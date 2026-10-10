@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import SmoothScroll from "@/components/SmoothScroll";
 import { Analytics } from "@vercel/analytics/next";
 import { PostHogAnalytics } from "./PostHogAnalytics";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Inter is self-hosted (latin subset, variable weight) so the build never
+// downloads fonts from Google; a failed download there broke Vercel deploys.
+// License: app/fonts/Inter-OFL.txt (SIL Open Font License 1.1).
+const inter = localFont({
+  src: "./fonts/Inter-latin-var.woff2",
+  weight: "300 900",
+  style: "normal",
   variable: "--font-inter",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
