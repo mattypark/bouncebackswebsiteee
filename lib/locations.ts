@@ -49,6 +49,7 @@ export const LOCATION_DATA: StateData[] = [
       { name: "Valencia Trails", city: "Naples", nonprofit: true, coords: [-81.75, 26.16] },
       { name: "Veterans Park", city: "Naples", nonprofit: true, coords: [-81.80, 26.18] },
       { name: "Tampa Bay Pickleball Club", city: "Oldsmar", nonprofit: false, coords: [-82.67, 28.03] },
+      { name: "The Country Club at Mirasol", city: "Palm Beach Gardens", nonprofit: false, coords: [-80.17, 26.85] },
       { name: "PicklePlex", city: "Punta Gorda", nonprofit: false, coords: [-82.05, 26.93] },
       { name: "The Dunes", city: "Sanibel", nonprofit: false, coords: [-82.07, 26.44] },
       { name: "Pickleball Shack SRQ", city: "Sarasota", nonprofit: false, coords: [-82.53, 27.34] },
