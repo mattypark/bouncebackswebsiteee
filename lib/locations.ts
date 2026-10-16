@@ -50,6 +50,7 @@ export const LOCATION_DATA: StateData[] = [
       { name: "Veterans Park", city: "Naples", nonprofit: true, coords: [-81.80, 26.18] },
       { name: "Tampa Bay Pickleball Club", city: "Oldsmar", nonprofit: false, coords: [-82.67, 28.03] },
       { name: "The Country Club at Mirasol", city: "Palm Beach Gardens", nonprofit: false, coords: [-80.17, 26.85] },
+      { name: "BallenIsles Country Club", city: "Palm Beach Gardens", nonprofit: false, coords: [-80.15, 26.83] },
       { name: "PicklePlex", city: "Punta Gorda", nonprofit: false, coords: [-82.05, 26.93] },
       { name: "The Dunes", city: "Sanibel", nonprofit: false, coords: [-82.07, 26.44] },
       { name: "Pickleball Shack SRQ", city: "Sarasota", nonprofit: false, coords: [-82.53, 27.34] },
@@ -218,6 +219,7 @@ export const LOCATION_DATA: StateData[] = [
     locations: [
       { name: "Northville Pickleball Club", city: "Northville", nonprofit: false, coords: [-83.48, 42.43] },
       { name: "Wall Lake", city: "Delton", nonprofit: false, coords: [-85.42, 42.49] },
+      { name: "Revolin Sports Retail", city: "Holland", nonprofit: false, coords: [-86.11, 42.79] },
     ],
   },
   {
