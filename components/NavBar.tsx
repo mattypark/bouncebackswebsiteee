@@ -3,16 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrandLogo from "./BrandLogo";
-
-const menuLinks = [
-  { name: "Home", href: "/" },
-  { name: "Shop", href: "/shop" },
-  { name: "About", href: "/about" },
-  { name: "Order a Bin", href: "/request-bin" },
-  { name: "Bin Locations", href: "/locations" },
-  { name: "Ambassadors", href: "/ambassador" },
-  { name: "Account", href: "/account" },
-];
+import { menuLinks } from "@/lib/menu-links";
 
 const desktopLinks = [
   { name: "Shop", href: "/shop" },
