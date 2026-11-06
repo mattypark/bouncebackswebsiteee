@@ -9,5 +9,6 @@ export const menuLinks = [
   { name: "Order a Bin", href: "/request-bin" },
   { name: "Bin Locations", href: "/locations" },
   { name: "Ambassadors", href: "/ambassador" },
+  { name: "Contact", href: "/contact" },
   { name: "Account", href: "/account" },
 ];

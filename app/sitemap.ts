@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/about`, lastModified: new Date(), priority: 0.8 },
     { url: `${baseUrl}/request-bin`, lastModified: new Date(), priority: 0.7 },
     { url: `${baseUrl}/ambassador`, lastModified: new Date(), priority: 0.6 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), priority: 0.6 },
     { url: `${baseUrl}/account`, lastModified: new Date(), priority: 0.5 },
   ];
 }

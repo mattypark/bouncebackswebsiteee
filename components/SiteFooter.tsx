@@ -29,7 +29,7 @@ const COLUMNS: { heading: string; links: { name: string; href: string }[] }[] = 
   {
     heading: "Support",
     links: [
-      { name: "Contact Us", href: "/about#contact" },
+      { name: "Contact Us", href: "/contact" },
       { name: "Account", href: "/account" },
       { name: "Manage Subscription", href: "/account" },
     ],
